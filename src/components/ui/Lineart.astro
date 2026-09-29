@@ -1,0 +1,29 @@
+---
+import { lineart } from '../../lib/lineart';
+
+interface Props {
+  name: string;
+  class?: string;
+  strokeWidth?: number;
+}
+
+const { name, class: className = '', strokeWidth = 1.2 } = Astro.props;
+const paths = lineart[name] || lineart.drone;
+---
+
+<svg
+  viewBox="0 0 400 300"
+  preserveAspectRatio="xMidYMid slice"
+  fill="none"
+  stroke="currentColor"
+  stroke-width={strokeWidth}
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  class={`lineart absolute inset-0 w-full h-full pointer-events-none ${className}`}
+  data-lineart
+  aria-hidden="true"
+>
+  {paths.map((d) => (
+    <path d={d} pathLength={1} class="lineart-path" />
+  ))}
+</svg>

@@ -1,0 +1,48 @@
+---
+// Analytics component — loads GA4, Meta Pixel, LinkedIn Insight Tag
+const gaId = import.meta.env.PUBLIC_GA_ID;
+const metaPixelId = import.meta.env.PUBLIC_META_PIXEL_ID;
+const linkedinPartnerId = import.meta.env.PUBLIC_LINKEDIN_PARTNER_ID;
+---
+
+{gaId && (
+  <script is:inline define:vars={{ gaId }}>
+    /* eslint-disable prefer-rest-params */
+    const s = document.createElement('script');
+    s.async = true;
+    s.src = 'https://www.googletagmanager.com/gtag/js?id=' + gaId;
+    document.head.appendChild(s);
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', gaId, { send_page_view: false });
+  </script>
+)}
+
+{metaPixelId && (
+  <script is:inline define:vars={{ metaPixelId }}>
+    /* eslint-disable no-var, prefer-rest-params, prefer-spread, @typescript-eslint/no-unused-expressions */
+    (function(){var f=window,b=document,e='script',v='https://connect.facebook.net/en_US/fbevents.js',n,t,s;if(f.fbq){return}n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq){f._fbq=n}n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)})();
+    fbq('init', metaPixelId);
+    fbq('track', 'PageView');
+  </script>
+)}
+
+{linkedinPartnerId && (
+  <script is:inline define:vars={{ linkedinPartnerId }}>
+    window._linkedin_partner_ids = window._linkedin_partner_ids || [];
+    window._linkedin_partner_ids.push(linkedinPartnerId);
+    (function(){const s=document.createElement("script");s.async=true;s.src="https://snap.licdn.com/li.lms-analytics/insight.min.js";document.head.appendChild(s)})();
+  </script>
+)}
+
+<script is:inline>
+  document.addEventListener('astro:page-load', function() {
+    if (typeof gtag === 'function') {
+      gtag('event', 'page_view', { page_path: window.location.pathname });
+    }
+    if (typeof fbq === 'function') {
+      fbq('track', 'PageView');
+    }
+  });
+</script>

@@ -1,0 +1,363 @@
+---
+import { getMenus, getServices, getHeroes, getSiteContact, getSiteSettings, htmlToText } from '../../lib/data';
+
+const [menus, contact, settings, services, heroes] = await Promise.all([
+  getMenus(),
+  getSiteContact(),
+  getSiteSettings(),
+  getServices(),
+  getHeroes(),
+]);
+
+const toPath = (href: string): string => {
+  if (!href) return '';
+  if (href.startsWith('/')) return href;
+  try {
+    return new URL(href).pathname;
+  } catch {
+    return href;
+  }
+};
+const normPath = (href: string): string => toPath(href).replace(/\/+$/, '') || '/';
+
+const baseItems = menus.primary.length
+  ? menus.primary.map((item) => ({ label: item.label, href: item.url }))
+  : [
+      { label: 'WORK', href: '/projects/' },
+      { label: 'SERVICES', href: '/services/' },
+      { label: 'ABOUT', href: '/about/' },
+      { label: 'THE DROP', href: '/blog/' },
+    ];
+
+const hasContactItem = baseItems.some((item) => normPath(item.href) === '/contact');
+const items = hasContactItem ? baseItems : [...baseItems, { label: "LET'S TALK", href: '/contact/' }];
+
+const socialItems = menus.footerSocial.length
+  ? menus.footerSocial
+  : [
+      { label: 'Instagram', url: 'https://instagram.com/thedigitalecho' },
+      { label: 'LinkedIn', url: 'https://linkedin.com/company/thedigitalecho' },
+      { label: 'Facebook', url: 'https://facebook.com/thedigitalecho' },
+      { label: 'YouTube', url: 'https://youtube.com/@thedigitalecho' },
+    ];
+
+// Hover panels — one per menu link, keyed by normalized path.
+type PanelHeading = { text: string; accent?: boolean };
+type NavPanel = {
+  href?: string;
+  eyebrow?: string;
+  headings: PanelHeading[];
+  description?: string;
+  items?: { label: string; href: string }[];
+};
+
+const itemHrefByKey = new Map<string, string>();
+for (const item of items) {
+  const key = normPath(item.href);
+  if (!itemHrefByKey.has(key)) itemHrefByKey.set(key, item.href);
+}
+
+const panels: Record<string, NavPanel> = {};
+
+// 1. Page heroes (title + title1 + description) for every menu-linked page
+for (const hero of heroes) {
+  const key = normPath(hero.selectPage);
+  if (!itemHrefByKey.has(key)) continue;
+  const headings: PanelHeading[] = [
+    ...hero.title
+      .split('\n')
+      .map((line) => line.trim())
+      .filter(Boolean)
+      .map((text) => ({ text })),
+    ...(hero.title1.trim() ? [{ text: hero.title1.trim(), accent: true }] : []),
+  ];
+  const description = htmlToText(hero.heroDescription);
+  panels[key] = {
+    href: itemHrefByKey.get(key),
+    eyebrow: hero.smallText.trim() || undefined,
+    headings,
+    description: description || undefined,
+  };
+}
+
+// 2. Service-detail pages linked straight from the menu (e.g. The Feed → social media mgmt)
+for (const service of services) {
+  const key = normPath(`/services/${service.slug}/`);
+  if (panels[key] || !itemHrefByKey.has(key)) continue;
+  const description = htmlToText(service.heroDescription || '');
+  if (!service.heroTitle && !description) continue;
+  panels[key] = {
+    href: itemHrefByKey.get(key),
+    eyebrow: service.title || undefined,
+    headings: service.heroTitle ? [{ text: service.heroTitle }] : [],
+    description: description || undefined,
+  };
+}
+
+// 3. What We Do → live services list (replaces the /services/ hero panel)
+const serviceItems = services.map((service) => ({
+  label: service.title,
+  // WP `uri` uses the CPT rewrite slug (/service/...) but the Astro route is /services/
+  href: `/services/${service.slug}/`,
+}));
+if (serviceItems.length) {
+  panels['/services'] = { eyebrow: 'Services', headings: [], items: serviceItems };
+}
+---
+
+<div id="fullscreen-nav" class="fullscreen-nav" data-open="false">
+  <button id="nav-close" class="fullscreen-nav__close" aria-label="Close menu">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <line x1="18" y1="6" x2="6" y2="18"></line>
+      <line x1="6" y1="6" x2="18" y2="18"></line>
+    </svg>
+  </button>
+
+  <!-- Logo — top center -->
+  <div class="fullscreen-nav__logo">
+    {settings.logo ? (
+      <a href="/" class="fullscreen-nav__logo-link">
+        <img src={settings.logo} alt={settings.title} class="h-14 md:h-20 w-auto" />
+      </a>
+    ) : (
+      <a href="/" class="fullscreen-nav__logo-text">
+        THE <span>DIGITAL</span> ECHO
+      </a>
+    )}
+  </div>
+
+  <div class="fullscreen-nav__inner">
+    <!-- Left: Menu Items -->
+    <nav class="fullscreen-nav__menu" aria-label="Main menu">
+      {items.map((item, index) => {
+        const key = normPath(item.href);
+        return (
+          <a
+            href={item.href}
+            class:list={['fullscreen-nav__item', key === '/contact' && 'text-accent']}
+            data-nav-panel={panels[key] ? key : null}
+          >
+            <span class="fullscreen-nav__number">{String(index + 1).padStart(2, '0')}</span>
+            <span class="fullscreen-nav__label">{item.label}</span>
+          </a>
+        );
+      })}
+    </nav>
+
+    <!-- Right: hover reveal panel -->
+    <div class="fullscreen-nav__panel">
+      {Object.entries(panels).map(([key, panel]) => {
+        const Wrapper = panel.href && !panel.items ? 'a' : 'div';
+        const wrapperHref = panel.href && !panel.items ? panel.href : undefined;
+        return (
+          <div class="fullscreen-nav__panel-list" data-panel={key}>
+            <Wrapper href={wrapperHref} class="fullscreen-nav__panel-body">
+              {panel.eyebrow && (
+                <p class="fullscreen-nav__panel-eyebrow fullscreen-nav__panel-anim" style="--i: 0">
+                  {panel.eyebrow}
+                </p>
+              )}
+              {panel.headings.map((heading, i) => (
+                <p
+                  class:list={[
+                    'fullscreen-nav__panel-heading',
+                    'fullscreen-nav__panel-anim',
+                    heading.accent && 'is-accent',
+                  ]}
+                  style={`--i: ${i + 1}`}
+                >
+                  {heading.text}
+                </p>
+              ))}
+              {panel.description && (
+                <p
+                  class="fullscreen-nav__panel-desc fullscreen-nav__panel-anim"
+                  style={`--i: ${panel.headings.length + 1}`}
+                >
+                  {panel.description}
+                </p>
+              )}
+            </Wrapper>
+            {panel.items?.map((sub, i) => (
+              <a href={sub.href} class="fullscreen-nav__panel-item fullscreen-nav__panel-anim" style={`--i: ${i + 1}`}>
+                <span class="fullscreen-nav__panel-num">{String(i + 1).padStart(2, '0')}</span>
+                <span class="fullscreen-nav__panel-label">{sub.label}</span>
+                <span class="fullscreen-nav__panel-arrow" aria-hidden="true">→</span>
+              </a>
+            ))}
+          </div>
+        );
+      })}
+    </div>
+  </div>
+
+  <!-- Bottom row: Get in touch (left) / Follow us (right) -->
+  <div class="fullscreen-nav__footer">
+    {(contact.contactEmail || contact.contactWhatsappUrl) && (
+      <div class="fullscreen-nav__foot-block">
+        <p class="fullscreen-nav__contact-label">GET IN TOUCH</p>
+        <div class="fullscreen-nav__foot-links">
+          {contact.contactEmail && (
+            <a href={`mailto:${contact.contactEmail}`} class="fullscreen-nav__contact-value">
+              {contact.contactEmail}
+            </a>
+          )}
+          {contact.contactWhatsappUrl && (
+            <a
+              href={contact.contactWhatsappUrl}
+              class="fullscreen-nav__contact-value"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              WhatsApp
+            </a>
+          )}
+        </div>
+      </div>
+    )}
+
+    <div class="fullscreen-nav__foot-block fullscreen-nav__foot-block--right">
+      <p class="fullscreen-nav__contact-label">FOLLOW US</p>
+      <div class="fullscreen-nav__foot-links">
+        {socialItems.map((item) => (
+          <a
+            href={item.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="fullscreen-nav__contact-value"
+          >
+            {item.label}
+          </a>
+        ))}
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  import { gsap } from 'gsap';
+  import { stopSmoothScroll, startSmoothScroll } from '../../animations/smooth-scroll';
+
+  let cleanupFns: (() => void)[] = [];
+
+  function initNav() {
+    // Clean up previous listeners
+    cleanupFns.forEach(fn => fn());
+    cleanupFns = [];
+
+    const nav = document.getElementById('fullscreen-nav');
+    const menuToggle = document.getElementById('menu-toggle');
+    const navClose = document.getElementById('nav-close');
+
+    if (!nav || !menuToggle || !navClose) return;
+
+    const menu = nav.querySelector('.fullscreen-nav__menu');
+    const items = nav.querySelectorAll('.fullscreen-nav__item');
+    const panels = Array.from(nav.querySelectorAll<HTMLElement>('[data-panel]'));
+    const logo = nav.querySelector('.fullscreen-nav__logo');
+    const footer = nav.querySelector('.fullscreen-nav__footer');
+    const canHover = window.matchMedia('(hover: hover) and (min-width: 768px)').matches;
+
+    function activatePanel(key: string | null) {
+      panels.forEach((panel) => {
+        panel.classList.toggle('is-active', !!key && panel.dataset.panel === key);
+      });
+    }
+
+    function handleItemEnter(e: Event) {
+      const key = (e.currentTarget as HTMLElement).dataset.navPanel || null;
+      activatePanel(key);
+    }
+
+    function handleMenuLeave() {
+      activatePanel(null);
+    }
+
+    if (canHover) {
+      items.forEach((item) => {
+        item.addEventListener('mouseenter', handleItemEnter);
+        item.addEventListener('focus', handleItemEnter);
+      });
+      menu?.addEventListener('mouseleave', handleMenuLeave);
+    }
+
+    function openNav() {
+      nav!.setAttribute('data-open', 'true');
+      document.body.style.overflow = 'hidden';
+      stopSmoothScroll();
+      activatePanel(null);
+
+      if (logo) {
+        gsap.fromTo(logo,
+          { opacity: 0, y: -20 },
+          { opacity: 1, y: 0, duration: 0.6, ease: 'power3.out' }
+        );
+      }
+
+      gsap.fromTo(items,
+        { opacity: 0, y: 40 },
+        { opacity: 1, y: 0, duration: 0.5, stagger: 0.08, ease: 'power3.out' }
+      );
+
+      if (footer) {
+        gsap.fromTo(footer,
+          { opacity: 0, y: 20 },
+          { opacity: 1, y: 0, duration: 0.6, delay: 0.35, ease: 'power3.out' }
+        );
+      }
+    }
+
+    function closeNav() {
+      nav!.setAttribute('data-open', 'false');
+      document.body.style.overflow = '';
+      startSmoothScroll();
+      activatePanel(null);
+    }
+
+    function handleToggle() { openNav(); }
+    function handleClose() { closeNav(); }
+    function handleKeydown(e: KeyboardEvent) {
+      if (e.key === 'Escape' && nav!.getAttribute('data-open') === 'true') {
+        closeNav();
+      }
+    }
+
+    menuToggle.addEventListener('click', handleToggle);
+    navClose.addEventListener('click', handleClose);
+    document.addEventListener('keydown', handleKeydown);
+
+    // Close on link click (menu links + panel links)
+    const links = nav!.querySelectorAll('a');
+    links.forEach((link) => {
+      link.addEventListener('click', closeNav);
+    });
+
+    // Store cleanup functions
+    cleanupFns.push(
+      () => menuToggle.removeEventListener('click', handleToggle),
+      () => navClose.removeEventListener('click', handleClose),
+      () => document.removeEventListener('keydown', handleKeydown),
+      () => links.forEach((link) => link.removeEventListener('click', closeNav)),
+      () => {
+        if (!canHover) return;
+        items.forEach((item) => {
+          item.removeEventListener('mouseenter', handleItemEnter);
+          item.removeEventListener('focus', handleItemEnter);
+        });
+        menu?.removeEventListener('mouseleave', handleMenuLeave);
+      },
+    );
+  }
+
+  // Initial load
+  initNav();
+
+  // Re-initialize after Astro ClientRouter navigation
+  document.addEventListener('astro:page-load', initNav);
+
+  // Cleanup on navigation start
+  document.addEventListener('astro:before-swap', () => {
+    cleanupFns.forEach(fn => fn());
+    cleanupFns = [];
+  });
+</script>

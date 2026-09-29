@@ -1,0 +1,30 @@
+---
+interface Props {
+  videoSrc?: string;
+  posterSrc?: string;
+  overlayOpacity?: number;
+}
+
+const {
+  videoSrc = '/assets/hero-section-video1.mp4',
+  posterSrc = '',
+  overlayOpacity = 0.3,
+} = Astro.props;
+---
+
+<div class="video-bg">
+  <video
+    class="video-bg__video"
+    autoplay
+    muted
+    loop
+    playsinline
+    poster={posterSrc}
+  >
+    <source src={videoSrc} type="video/mp4" />
+  </video>
+  <div class="video-bg__overlay" style={`opacity: ${overlayOpacity}`}></div>
+  <div class="video-bg__content">
+    <slot />
+  </div>
+</div>

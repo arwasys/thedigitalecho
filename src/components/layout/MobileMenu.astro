@@ -1,0 +1,64 @@
+---
+interface Props {
+  items: { label: string; href: string }[];
+}
+
+const { items } = Astro.props;
+---
+
+<div
+  id="mobile-menu"
+  data-open="false"
+  class="fixed inset-0 z-40 bg-bg flex flex-col justify-center items-center opacity-0 pointer-events-none transition-opacity duration-500"
+>
+  <nav class="flex flex-col items-center gap-8">
+    {items.map((item, index) => (
+      <a
+        href={item.href}
+        class="text-4xl md:text-6xl font-bold tracking-tight hover:text-accent transition-colors duration-300"
+        style={`transition-delay: ${index * 50}ms`}
+      >
+        <span class="text-accent-blue text-sm mr-4">0{index + 1}</span>
+        {item.label}
+      </a>
+    ))}
+    <a
+      href="/contact/"
+      class="text-4xl md:text-6xl font-bold tracking-tight text-accent mt-8"
+    >
+      LET'S TALK
+    </a>
+  </nav>
+</div>
+
+<script>
+  const mobileMenu = document.getElementById('mobile-menu');
+
+  const observer = new MutationObserver(() => {
+    if (mobileMenu?.getAttribute('data-open') === 'true') {
+      mobileMenu.classList.remove('opacity-0', 'pointer-events-none');
+      mobileMenu.classList.add('opacity-100', 'pointer-events-auto');
+    } else {
+      mobileMenu?.classList.add('opacity-0', 'pointer-events-none');
+      mobileMenu?.classList.remove('opacity-100', 'pointer-events-auto');
+    }
+  });
+
+  observer.observe(mobileMenu!, { attributes: true });
+
+  // Close on link click
+  mobileMenu?.querySelectorAll('a').forEach((link) => {
+    link.addEventListener('click', () => {
+      mobileMenu.setAttribute('data-open', 'false');
+      document.body.style.overflow = '';
+    });
+  });
+
+  // Close on ESC
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && mobileMenu?.getAttribute('data-open') === 'true') {
+      mobileMenu.setAttribute('data-open', 'false');
+      document.body.style.overflow = '';
+    }
+  });
+</script>

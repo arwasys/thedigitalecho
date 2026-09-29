@@ -1,0 +1,150 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Header from '../components/layout/Header.astro';
+import Footer from '../components/layout/Footer.astro';
+import InnerHero from '../components/ui/InnerHero.astro';
+import ServiceIcon from '../components/ui/ServiceIcon.astro';
+import LineartField from '../components/ui/LineartField.astro';
+import { getHeroByPage, getPageContent, getServices, parseContentSections } from '../lib/data';
+
+const [hero, aboutPage, services] = await Promise.all([
+  getHeroByPage('/about/'),
+  getPageContent('/about/'),
+  getServices(),
+]);
+
+const parsed = aboutPage?.content ? parseContentSections(aboutPage.content) : null;
+const sections = parsed?.sections || [];
+
+const capabilities = services.map((s) => ({ slug: s.slug, title: s.title }));
+const pageCta = aboutPage?.pageCta;
+---
+
+<BaseLayout title="About" seo={aboutPage?.seo}>
+  <Header />
+  <main id="main-content" data-page="about" transition:name="page">
+    <InnerHero
+      hero={hero}
+      fallback={{
+        smallText: 'The Crew',
+        title: 'About',
+        title1: 'The Digital Echo',
+        description:
+          'Meet The Digital Echo, a Gen Z-led digital marketing and content production company helping Indian brands create, communicate and grow online.',
+      }}
+      marquee={capabilities.map((capability) => capability.title)}
+      indexLabel="The Crew · 03"
+      countLabel={capabilities.length ? `${String(capabilities.length).padStart(2, '0')} Capabilities` : ''}
+    />
+
+    <!-- Story sections from WP -->
+    {sections.map((section, index) => (
+      <section
+        class:list={['py-24 relative overflow-hidden', index > 0 && 'border-t border-border']}
+      >
+        <LineartField />
+        <div class="container relative z-10">
+          <div class="max-w-4xl mx-auto">
+            <h2 class:list={[
+              'font-bold mb-8',
+              index === 0 ? 'text-4xl md:text-6xl' : 'text-3xl md:text-5xl',
+            ]} data-reveal="up">{section.heading}</h2>
+            {section.paragraphs.map((paragraph, pIndex) => (
+              <p class="text-lg text-muted-foreground leading-relaxed mb-6" data-reveal="up" data-delay={0.1 * (pIndex + 1)}>
+                {paragraph}
+              </p>
+            ))}
+            {section.items.length > 0 && (
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-8">
+                {section.items.map((item, iIndex) => (
+                  <div class="p-6 border border-border" data-reveal="up" data-delay={iIndex * 0.05}>
+                    <span class="text-accent">→</span>
+                    <span class="ml-4 font-medium">{item.title || item.text}</span>
+                    {item.title && item.desc && <p class="mt-2 ml-8 text-muted-foreground">{item.desc}</p>}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
+    ))}
+
+    <!-- Capabilities -->
+    {capabilities.length > 0 && (
+      <section
+        class:list={[
+          'py-24 relative overflow-hidden',
+          sections.length > 0 && 'border-t border-border',
+        ]}
+      >
+        <LineartField />
+        <div class="container relative z-10">
+          <h2 class="text-3xl md:text-5xl font-bold mb-12" data-reveal="up">Capabilities</h2>
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {capabilities.map((cap, index) => (
+              <a
+                href={`/services/${cap.slug}/`}
+                class="p-6 border border-border hover:border-accent hover:bg-accent/5 transition-all duration-300 text-center group"
+                data-reveal="up"
+                data-delay={index * 0.05}
+              >
+                <ServiceIcon service={cap.slug} />
+                <span class="block mt-4 text-sm tracking-wider group-hover:text-accent transition-colors duration-300">{cap.title}</span>
+              </a>
+            ))}
+          </div>
+        </div>
+      </section>
+    )}
+
+    <!-- CTA -->
+    <section
+      class:list={[
+        'py-24 relative overflow-hidden',
+        (sections.length > 0 || capabilities.length > 0) && 'border-t border-border',
+      ]}
+    >
+      <LineartField />
+      <div class="container text-center relative z-10">
+        <h2 class="text-4xl md:text-6xl font-bold mb-8" data-text-reveal>
+          <span class="reveal-line block">{pageCta?.title1 || 'WANT TO JOIN'}</span>
+          <span class="reveal-line block text-accent">{pageCta?.title2 || 'THE CREW?'}</span>
+        </h2>
+        <div data-reveal="up" data-delay="0.2">
+          <a
+            href={pageCta?.buttonUrl || '/contact/'}
+            class="btn btn-gold"
+            data-magnetic="0.3"
+          >
+            {pageCta?.buttonText || "LET'S TALK →"}
+          </a>
+        </div>
+      </div>
+    </section>
+  </main>
+  <Footer />
+
+  <script>
+    import { initScrollReveal, initTextReveal, cleanupAnimations } from '../animations/reveal';
+    import { initMagneticButtons } from '../animations/magnetic';
+
+    let inited = false;
+
+    function init() {
+      // Run exactly once per arrival on THIS page — other pages' leaked
+      // astro:page-load listeners must not re-init (or kill) our animations.
+      if (inited || !document.querySelector('main[data-page="about"]')) return;
+      inited = true;
+
+      cleanupAnimations();
+      initScrollReveal();
+      initTextReveal();
+      initMagneticButtons();
+    }
+
+    document.addEventListener('DOMContentLoaded', init);
+    document.addEventListener('astro:page-load', init);
+    document.addEventListener('astro:before-swap', () => { inited = false; });
+  </script>
+</BaseLayout>

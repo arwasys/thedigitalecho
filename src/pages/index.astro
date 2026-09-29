@@ -1,0 +1,141 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Header from '../components/layout/Header.astro';
+import Footer from '../components/layout/Footer.astro';
+import PageLoader from '../components/layout/PageLoader.astro';
+import OrganizationSchema from '../components/seo/OrganizationSchema.astro';
+import WebSiteSchema from '../components/seo/WebSiteSchema.astro';
+import FAQSchema from '../components/seo/FAQSchema.astro';
+import LocalBusinessSchema from '../components/seo/LocalBusinessSchema.astro';
+import PageHero from '../components/ui/PageHero.astro';
+import BrandStatement from '../components/sections/BrandStatement.astro';
+import ServicesList from '../components/sections/ServicesList.astro';
+import ContentProduction from '../components/sections/ContentProduction.astro';
+import SocialMedia from '../components/sections/SocialMedia.astro';
+import DroneSection from '../components/sections/DroneSection.astro';
+import HorizontalProjects from '../components/sections/HorizontalProjects.astro';
+import ProcessSection from '../components/sections/ProcessSection.astro';
+import IndustriesSection from '../components/sections/IndustriesSection.astro';
+import Testimonials from '../components/sections/Testimonials.astro';
+import BlogPreview from '../components/sections/BlogPreview.astro';
+import FAQSection from '../components/sections/FAQSection.astro';
+import CTASection from '../components/sections/CTASection.astro';
+import { getServices, getFeaturedProjects, getPosts, getHeroByPage, getBrandStatement, getFaqs, getTestimonials, getProcessSteps, getIndustriesSection, getHomeSections, getSiteContact, getSiteText } from '../lib/data';
+
+// All queries in parallel — sequential awaits made each dev navigation take seconds
+const [
+  services,
+  featuredProjects,
+  { posts },
+  hero,
+  brandStatement,
+  faqs,
+  testimonials,
+  processSteps,
+  industries,
+  [homeSections, siteContact, siteText],
+] = await Promise.all([
+  getServices(),
+  getFeaturedProjects(),
+  getPosts(3),
+  getHeroByPage('/'),
+  getBrandStatement(),
+  getFaqs(),
+  getTestimonials(),
+  getProcessSteps(),
+  getIndustriesSection(),
+  Promise.all([getHomeSections(), getSiteContact(), getSiteText()]),
+]);
+const cpImages = [homeSections?.cpImage1, homeSections?.cpImage2, homeSections?.cpImage3, homeSections?.cpImage4].filter(Boolean) as string[];
+---
+
+<BaseLayout title="Home">
+  <OrganizationSchema />
+  <WebSiteSchema />
+  <FAQSchema faqs={faqs} />
+  <LocalBusinessSchema />
+  <PageLoader />
+  <Header />
+  <main id="main-content" data-page="home" transition:name="page">
+    <PageHero hero={hero} />
+    <BrandStatement statement={brandStatement} />
+    <ServicesList
+      services={services}
+      title1={siteText.titleServices1}
+      title2={siteText.titleServices2}
+      allServicesLabel={siteText.btnAllServices}
+    />
+    <ContentProduction
+      title={homeSections?.cpTitle}
+      titleAccent={homeSections?.cpTitleAccent}
+      images={cpImages.length ? cpImages : undefined}
+    />
+    <SocialMedia
+      title1={homeSections?.smTitle1}
+      titleAccent={homeSections?.smTitleAccent}
+      title2={homeSections?.smTitle2}
+      title2Accent={homeSections?.smTitle2Accent}
+      platforms={homeSections?.smPlatforms}
+    />
+    <DroneSection
+      eyebrow={homeSections?.droneEyebrow}
+      title1={homeSections?.droneTitle1}
+      title2={homeSections?.droneTitle2}
+      title3={homeSections?.droneTitle3}
+      body={homeSections?.droneBody}
+      buttonLabel={homeSections?.droneButtonLabel}
+      buttonUrl={homeSections?.droneButtonUrl}
+    />
+    <HorizontalProjects
+      projects={featuredProjects}
+      title1={siteText.titleProjects1}
+      title2={siteText.titleProjects2}
+      viewAllLabel={siteText.btnViewAllProjects}
+    />
+    <ProcessSection steps={processSteps} title1={siteText.titleProcess1} title2={siteText.titleProcess2} />
+    <IndustriesSection data={industries} title1={siteText.titleIndustries1} title2={siteText.titleIndustries2} />
+    <Testimonials testimonials={testimonials} title1={siteText.titleTestimonials1} title2={siteText.titleTestimonials2} />
+    <BlogPreview
+      posts={posts}
+      title1={siteText.titleBlog1}
+      title2={siteText.titleBlog2}
+      viewAllLabel={siteText.btnViewAllArticles}
+    />
+    <FAQSection faqs={faqs} title={siteText.titleFaq} />
+    <CTASection
+      title1={homeSections?.ctaTitle1}
+      titleAccent={homeSections?.ctaTitleAccent}
+      body={homeSections?.ctaBody}
+      button1Label={homeSections?.ctaButton1Label}
+      button1Url={homeSections?.ctaButton1Url}
+      button2Label={homeSections?.ctaButton2Label}
+      button2Url={siteContact.contactWhatsappUrl}
+    />
+  </main>
+  <Footer />
+</BaseLayout>
+
+<script>
+  import { initScrollReveal, initTextReveal, initImageReveal, initParallax, initServicesReveal, initHorizontalScroll, cleanupAnimations } from '../animations/reveal';
+  import { initMagneticButtons } from '../animations/magnetic';
+
+  let inited = false;
+
+  function init() {
+    if (inited || !document.querySelector('main[data-page="home"]')) return;
+    inited = true;
+
+    cleanupAnimations();
+    initScrollReveal();
+    initTextReveal();
+    initImageReveal();
+    initParallax();
+    initServicesReveal();
+    initMagneticButtons();
+    initHorizontalScroll();
+  }
+
+  init();
+  document.addEventListener('astro:page-load', init);
+  document.addEventListener('astro:before-swap', () => { inited = false; });
+</script>

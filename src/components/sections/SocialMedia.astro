@@ -1,0 +1,43 @@
+---
+import LineartField from '../ui/LineartField.astro';
+
+interface Props {
+  title1?: string;
+  titleAccent?: string;
+  title2?: string;
+  title2Accent?: string;
+  platforms?: string;
+}
+
+const {
+  title1 = 'YOUR FEED',
+  titleAccent = 'CALLED.',
+  title2 = 'IT WANTS',
+  title2Accent = 'BETTER CONTENT.',
+  platforms = 'Instagram\nFacebook\nLinkedIn\nWhatsApp\nYouTube\nGoogle',
+} = Astro.props;
+
+const platformList = platforms
+  .split(/\n|,/)
+  .map((p) => p.trim())
+  .filter(Boolean);
+---
+
+<section class="py-24 border-b border-border overflow-hidden relative">
+  <LineartField />
+  <div class="container relative z-10">
+    <h2 class="text-4xl md:text-6xl lg:text-8xl font-bold tracking-tight leading-none mb-4" data-text-reveal>
+      <span class="reveal-line block">{title1}</span>
+      <span class="reveal-line block text-accent-blue">{titleAccent}</span>
+    </h2>
+    <h3 class="text-4xl md:text-6xl lg:text-8xl font-bold tracking-tight leading-none mb-16 text-accent" data-text-reveal>
+      <span class="reveal-line block">{title2}</span>
+      <span class="reveal-line block">{title2Accent}</span>
+    </h3>
+    <div class="flex flex-wrap justify-center gap-8 md:gap-16" data-reveal="up">
+      {platformList.map((platform) => (
+        <span class="text-2xl md:text-4xl font-bold text-muted-foreground hover:text-accent-blue transition-colors duration-300 cursor-default">{platform}</span>
+      ))}
+    </div>
+  </div>
+</section>

@@ -1,0 +1,70 @@
+---
+import { getSiteSettings } from '../../lib/data';
+
+const settings = await getSiteSettings();
+---
+
+<header id="site-header" class="fixed top-0 left-0 right-0 z-50 transition-all duration-500" transition:name="header" transition:animate="none">
+  <div class="container flex items-center justify-between py-4 md:py-6">
+    <!-- Logo -->
+    <a href="/" class="flex items-center hover:opacity-80 transition-opacity duration-300 relative z-10">
+      {settings.logo ? (
+        <img 
+          src={settings.logo} 
+          alt={settings.title}
+          class="h-20 md:h-24 w-auto"
+        />
+      ) : (
+        <span class="text-sm font-bold tracking-widest uppercase transition-colors duration-300">
+          THE <span class="text-accent">DIGITAL</span> ECHO
+        </span>
+      )}
+    </a>
+
+    <!-- Right Side: CTA + Hamburger -->
+    <div class="flex items-center gap-6 relative z-10">
+      <a
+        href="/contact/"
+        class="btn btn-blue btn-sm hidden md:inline-flex"
+        data-magnetic="0.3"
+      >
+        LET'S TALK →
+      </a>
+
+      <!-- Hamburger Menu Toggle -->
+      <button
+        id="menu-toggle"
+        class="flex flex-col gap-2 p-2 group"
+        aria-label="Toggle menu"
+        aria-expanded="false"
+      >
+        <span class="w-8 h-0.5 bg-text transition-all duration-300 group-hover:bg-accent"></span>
+        <span class="w-8 h-0.5 bg-text transition-all duration-300 group-hover:bg-accent"></span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<script>
+  function handleScroll() {
+    const header = document.getElementById('site-header');
+    if (!header) return;
+    
+    if (window.scrollY > 50) {
+      header.classList.add('bg-bg/90', 'backdrop-blur-md', 'border-b', 'border-border');
+    } else {
+      header.classList.remove('bg-bg/90', 'backdrop-blur-md', 'border-b', 'border-border');
+    }
+  }
+  
+  function initHeader() {
+    // Re-binding instead of stacking: module eval + astro:page-load both fire
+    // on the initial load, and this listener must stay a single instance.
+    window.removeEventListener('scroll', handleScroll);
+    handleScroll();
+    window.addEventListener('scroll', handleScroll, { passive: true });
+  }
+
+  initHeader();
+  document.addEventListener('astro:page-load', initHeader);
+</script>

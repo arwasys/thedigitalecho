@@ -1,0 +1,211 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Header from '../../components/layout/Header.astro';
+import Footer from '../../components/layout/Footer.astro';
+import InnerHero from '../../components/ui/InnerHero.astro';
+import { getPosts, getHeroByPage } from '../../lib/data';
+
+const [{ posts }, hero] = await Promise.all([getPosts(20), getHeroByPage('/blog/')]);
+
+// Get all unique categories
+const allCategories = posts.flatMap((post) => post.categories.map((c) => c.name));
+const categories = [...new Set(allCategories)];
+
+// First post is featured
+const featured = posts[0];
+const remaining = posts.slice(1);
+---
+
+<BaseLayout title="The Drop">
+  <Header />
+  <main id="main-content" data-page="blog" transition:name="page">
+    <InnerHero
+      hero={hero}
+      fallback={{
+        smallText: 'The Drop',
+        title: 'Digital',
+        title1: 'Blog, Social Media Tips & Content Ideas',
+        description:
+          "The Drop.\nDigital marketing changes fast.\nWe write about what's actually happening.",
+      }}
+      marquee={categories}
+      indexLabel="The Drop · 04"
+      countLabel={posts.length ? `${String(posts.length).padStart(2, '0')} Articles` : ''}
+    />
+
+    <!-- Featured Article -->
+    {featured && (
+      <section class="py-24">
+        <div class="container">
+          <a
+            href={`/blog/${featured.slug}/`}
+            class="group block grid grid-cols-1 lg:grid-cols-2 gap-8 items-center"
+            data-reveal="up"
+          >
+            {featured.featuredImage && (
+              <div class="aspect-[16/9] overflow-hidden">
+                <img
+                  src={featured.featuredImage.node.sourceUrl}
+                  alt={featured.featuredImage.node.altText}
+                  width={featured.featuredImage.node.width || 1200}
+                  height={featured.featuredImage.node.height || 630}
+                  class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                />
+              </div>
+            )}
+            <div>
+              <span class="text-xs text-accent tracking-wider uppercase mb-4 block">Featured</span>
+              <div class="flex gap-2 mb-4">
+                {featured.categories.map((cat) => (
+                  <span class="text-xs text-accent-blue tracking-wider">{cat.name}</span>
+                ))}
+              </div>
+              <h2 class="text-3xl md:text-4xl font-bold mb-4 group-hover:text-accent transition-colors duration-300">
+                {featured.title}
+              </h2>
+              <p class="text-muted-foreground text-lg mb-6 line-clamp-3">{featured.excerpt}</p>
+              <div class="flex items-center gap-4 text-sm text-muted-foreground">
+                <span>{featured.author.name}</span>
+                <span>•</span>
+                <time datetime={featured.publishedDate}>
+                  {new Date(featured.publishedDate).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                  })}
+                </time>
+              </div>
+            </div>
+          </a>
+        </div>
+      </section>
+    )}
+
+    <!-- Category Filter -->
+    <section class:list={['py-12', featured && 'border-t border-border']}>
+      <div class="container">
+        <div class="flex flex-wrap gap-3 justify-center" data-reveal="up">
+          <button
+            class="category-filter"
+            data-category="all"
+            data-active="true"
+          >
+            ALL
+          </button>
+          {categories.map((cat) => (
+            <button
+              class="category-filter"
+              data-category={cat.toLowerCase()}
+            >
+              {cat.toUpperCase()}
+            </button>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <!-- Articles Grid -->
+    <section class="py-12">
+      <div class="container">
+        <div id="articles-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {remaining.map((post, index) => (
+            <a
+              href={`/blog/${post.slug}/`}
+              class="group block article-card"
+              data-categories={post.categories.map((c) => c.name.toLowerCase()).join(',')}
+              data-reveal="up"
+              data-delay={index * 0.1}
+            >
+              {post.featuredImage && (
+                <div class="aspect-[16/10] overflow-hidden mb-6">
+                  <img
+                    src={post.featuredImage.node.sourceUrl}
+                    alt={post.featuredImage.node.altText}
+                    width={post.featuredImage.node.width || 1200}
+                    height={post.featuredImage.node.height || 630}
+                    class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                    loading="lazy"
+                  />
+                </div>
+              )}
+              <div class="flex gap-2 mb-4">
+                {post.categories.map((cat) => (
+                  <span class="text-xs text-accent tracking-wider">{cat.name}</span>
+                ))}
+              </div>
+              <h2 class="text-xl font-bold mb-3 group-hover:text-accent transition-colors duration-300">
+                {post.title}
+              </h2>
+              <p class="text-muted-foreground line-clamp-2 text-sm">{post.excerpt}</p>
+              <p class="text-xs text-muted-foreground mt-4">
+                {new Date(post.publishedDate).toLocaleDateString('en-US', {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric',
+                })}
+              </p>
+            </a>
+          ))}
+        </div>
+
+        <div id="no-results" class="hidden text-center py-16">
+          <p class="text-muted-foreground text-lg">No articles found in this category.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+  <Footer />
+
+  <script>
+    import { initScrollReveal, initTextReveal, cleanupAnimations } from '../../animations/reveal';
+    import { initMagneticButtons } from '../../animations/magnetic';
+
+    let inited = false;
+
+    function init() {
+      if (inited || !document.querySelector('main[data-page="blog"]')) return;
+      inited = true;
+
+      cleanupAnimations();
+      initScrollReveal();
+      initTextReveal();
+      initMagneticButtons();
+
+      // Category filter
+      const filters = document.querySelectorAll('.category-filter');
+      const cards = document.querySelectorAll('.article-card');
+      const noResults = document.getElementById('no-results');
+
+      filters.forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const category = btn.getAttribute('data-category');
+
+          // Update active state
+          filters.forEach((f) => f.removeAttribute('data-active'));
+          btn.setAttribute('data-active', 'true');
+
+          // Filter cards
+          let visibleCount = 0;
+          cards.forEach((card) => {
+            const cardEl = card as HTMLElement;
+            const cardCategories = cardEl.dataset.categories || '';
+
+            if (!category) return;
+            if (category === 'all' || cardCategories.includes(category)) {
+              cardEl.style.display = '';
+              visibleCount++;
+            } else {
+              cardEl.style.display = 'none';
+            }
+          });
+
+          noResults?.classList.toggle('hidden', visibleCount > 0);
+        });
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', init);
+    document.addEventListener('astro:page-load', init);
+    document.addEventListener('astro:before-swap', () => { inited = false; });
+  </script>
+</BaseLayout>

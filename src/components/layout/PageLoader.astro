@@ -1,0 +1,102 @@
+---
+const logoUrl = import.meta.env.PUBLIC_LOGO_URL || '';
+---
+
+<div id="page-loader" class="fixed inset-0 z-[100] bg-bg flex items-center justify-center">
+  <div class="text-center">
+    <div class="loader-logo">
+      {logoUrl ? (
+        <img src={logoUrl} alt="The Digital Echo" class="h-24 md:h-32 w-auto" />
+      ) : (
+        <span class="text-4xl md:text-6xl font-bold tracking-tight text-accent">TDE</span>
+      )}
+    </div>
+    <div class="loader-line h-0.5 bg-accent mt-4 origin-left scale-x-0"></div>
+  </div>
+</div>
+
+<script>
+  import { gsap } from 'gsap';
+  import { stopSmoothScroll, startSmoothScroll } from '../../animations/smooth-scroll';
+
+  let introPlayed = false;
+  let introTimeline: gsap.core.Timeline | null = null;
+
+  // On a full page load the module runs while the document is still parsing;
+  // on a ClientRouter navigation it runs after the load event — that tells us
+  // the loader must never be shown (it would block every click).
+  const isInitialLoad = document.readyState !== 'complete';
+
+  function hideLoader() {
+    const loader = document.getElementById('page-loader');
+    if (loader) loader.style.display = 'none';
+    document.body.style.overflow = '';
+    startSmoothScroll();
+  }
+
+  function initLoader() {
+    if (introPlayed) {
+      hideLoader();
+      return;
+    }
+    introPlayed = true;
+
+    const loader = document.getElementById('page-loader');
+    if (!loader) return;
+
+    const logo = loader.querySelector('.loader-logo');
+    const line = loader.querySelector('.loader-line');
+
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReducedMotion || !isInitialLoad || loader.style.display === 'none') {
+      hideLoader();
+      return;
+    }
+
+    document.body.style.overflow = 'hidden';
+    stopSmoothScroll();
+
+    introTimeline = gsap.timeline({
+      onComplete: () => {
+        hideLoader();
+        introTimeline = null;
+      },
+    });
+
+    introTimeline.fromTo(logo,
+      { opacity: 0, scale: 0.8 },
+      { opacity: 1, scale: 1, duration: 0.6, ease: 'power3.out' }
+    )
+    .to(line, {
+      scaleX: 1,
+      duration: 0.5,
+      ease: 'power2.inOut',
+    }, '-=0.2')
+    .to(loader, {
+      yPercent: -100,
+      duration: 0.5,
+      ease: 'power3.inOut',
+    }, '+=0.2');
+  }
+
+  if (isInitialLoad) {
+    // First full load — play the intro once parsing is done
+    document.addEventListener('DOMContentLoaded', initLoader, { once: true });
+  } else {
+    // Arrived via client-side navigation — never show the loader
+    hideLoader();
+  }
+
+  // Safety net: hide on any page navigation unless the intro is mid-flight
+  // (also covers revisiting the home page, where this module does not re-execute
+  // but a fresh loader element is swapped in)
+  document.addEventListener('astro:page-load', () => {
+    if (!introTimeline) hideLoader();
+  });
+
+  document.addEventListener('astro:before-swap', () => {
+    introTimeline?.kill();
+    introTimeline = null;
+    hideLoader();
+  });
+</script>

@@ -1,0 +1,479 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Header from '../components/layout/Header.astro';
+import Footer from '../components/layout/Footer.astro';
+import InnerHero from '../components/ui/InnerHero.astro';
+import LineartField from '../components/ui/LineartField.astro';
+import { getHeroByPage, getContactForm, getSiteContact, getOffices, getServices } from '../lib/data';
+
+const [hero, cf7, siteContact, offices, services] = await Promise.all([
+  getHeroByPage('/contact/'),
+  getContactForm(),
+  getSiteContact(),
+  getOffices(),
+  getServices(),
+]);
+const whatsappUrl = siteContact.contactWhatsappUrl || '';
+const telHref = (phone: string) => `tel:${phone.replace(/\s+/g, '')}`;
+
+/** Inline stroke icons (same style as ServiceIcon) for the contact-details rows. */
+const contactIcons: Record<string, string> = {
+  phone: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>`,
+  email: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>`,
+};
+
+// REST base for Contact Form 7 (e.g. http://the-digital-echo.local/wp-json)
+const wpRestBase = (import.meta.env.WORDPRESS_GRAPHQL_URL || '').replace(
+  /\/graphql\/?$/,
+  '/wp-json',
+);
+---
+
+<BaseLayout title="Contact">
+  <Header />
+  <main id="main-content" data-page="contact" transition:name="page">
+    <InnerHero
+      hero={hero}
+      fallback={{
+        smallText: "Let's Talk",
+        title: 'Got A Brand',
+        title1: 'That Needs An Echo?',
+        description:
+          "Whether you need a one-day product shoot, a complete social media strategy, drone photography or ongoing digital marketing support, tell us what you're working on.\nWe'll figure out the next move together.",
+      }}
+      marquee={services.map((service) => service.title)}
+      indexLabel="Let's Talk · 05"
+      countLabel={siteContact.contactEmail || ''}
+    />
+
+    <section class="py-24 relative overflow-hidden">
+      <LineartField />
+      <div class="container relative z-10">
+        <div class="grid lg:grid-cols-2 gap-12 lg:gap-16 xl:gap-24 items-start">
+          <!-- LEFT COLUMN — contact details (WP: `office` CPT → `officeInfo`) -->
+          <div>
+            <p
+              class="text-xs font-medium tracking-wider uppercase text-accent-blue mb-8"
+              data-reveal="up"
+            >
+              Contact Details
+            </p>
+
+            {
+              offices.length > 0 ? (
+                offices.map((office, index) => (
+                  <div
+                    class={`contact-office ${index > 0 ? 'border-t border-border pt-10 mt-10' : ''}`}
+                    data-reveal="up"
+                    data-delay={index * 0.06}
+                  >
+                    {office.companyType && (
+                      <span class="inline-block px-3 py-1 mb-4 border border-accent/50 text-accent text-[11px] tracking-widest uppercase">
+                        {office.companyType}
+                      </span>
+                    )}
+                    {office.companyName && (
+                      <h3 class="text-2xl md:text-3xl font-bold mb-5">{office.companyName}</h3>
+                    )}
+                    <div class="space-y-3 text-lg text-muted-foreground">
+                      {office.address && <p class="whitespace-pre-line">{office.address}</p>}
+                      {office.phone1 && (
+                        <a
+                          href={telHref(office.phone1)}
+                          class="flex items-center gap-3 hover:text-accent transition-colors duration-300"
+                        >
+                          <span class="text-accent shrink-0" set:html={contactIcons.phone} />
+                          <span>{office.phone1}</span>
+                        </a>
+                      )}
+                      {office.phone2 && (
+                        <a
+                          href={telHref(office.phone2)}
+                          class="flex items-center gap-3 hover:text-accent transition-colors duration-300"
+                        >
+                          <span class="text-accent shrink-0" set:html={contactIcons.phone} />
+                          <span>{office.phone2}</span>
+                        </a>
+                      )}
+                      {office.email && (
+                        <a
+                          href={`mailto:${office.email}`}
+                          class="flex items-center gap-3 hover:text-accent transition-colors duration-300"
+                        >
+                          <span class="text-accent shrink-0" set:html={contactIcons.email} />
+                          <span>{office.email}</span>
+                        </a>
+                      )}
+                    </div>
+                    {office.mapUrl && (
+                      <iframe
+                        src={office.mapUrl}
+                        title={`${office.companyName || 'Office'} location map`}
+                        loading="lazy"
+                        referrerpolicy="no-referrer-when-downgrade"
+                        allowfullscreen
+                        class="mt-6 w-full h-64 border border-border"
+                      />
+                    )}
+                  </div>
+                ))
+              ) : (
+                <div class="space-y-3 text-lg text-muted-foreground" data-reveal="up">
+                  {siteContact.contactAddress && (
+                    <p class="whitespace-pre-line">{siteContact.contactAddress}</p>
+                  )}
+                  {siteContact.contactPhone && (
+                    <a
+                      href={telHref(siteContact.contactPhone)}
+                      class="flex items-center gap-3 hover:text-accent transition-colors duration-300"
+                    >
+                      <span class="text-accent shrink-0" set:html={contactIcons.phone} />
+                      <span>{siteContact.contactPhone}</span>
+                    </a>
+                  )}
+                  {siteContact.contactEmail && (
+                    <a
+                      href={`mailto:${siteContact.contactEmail}`}
+                      class="flex items-center gap-3 hover:text-accent transition-colors duration-300"
+                    >
+                      <span class="text-accent shrink-0" set:html={contactIcons.email} />
+                      <span>{siteContact.contactEmail}</span>
+                    </a>
+                  )}
+                  {whatsappUrl && (
+                    <a
+                      href={whatsappUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="inline-block text-accent hover:underline"
+                    >
+                      WhatsApp us →
+                    </a>
+                  )}
+                </div>
+              )
+            }
+          </div>
+
+          <!-- RIGHT COLUMN — contact form (Contact Form 7, rendered from WP) -->
+          <div>
+            {
+              cf7 && cf7.fields.length > 0 ? (
+                <form
+                  id="contact-form"
+                  class="space-y-8"
+                  novalidate
+                  data-wp-rest={wpRestBase}
+                  data-cf7-id={cf7.id}
+                  data-success-message={cf7.successMessage}
+                >
+                  {cf7.fields.map((field, index) =>
+                    field.type === 'radio' ? (
+                      <fieldset class="form-group" data-reveal="up" data-delay={index * 0.02}>
+                        <legend class="block text-sm text-muted-foreground tracking-wider mb-3">
+                          {field.label}
+                          {field.required && ' *'}
+                        </legend>
+                        <div class="flex flex-wrap gap-3">
+                          {field.options.map((option) => (
+                            <label class="inline-flex items-center gap-2 px-4 py-2 border border-border cursor-pointer hover:border-accent transition-colors duration-300">
+                              <input
+                                type="radio"
+                                name={field.name}
+                                value={option}
+                                required={field.required}
+                                class="accent-[var(--color-accent,#e8b931)]"
+                              />
+                              <span>{option}</span>
+                            </label>
+                          ))}
+                        </div>
+                        <p class="form-error text-sm text-red-500 mt-1 hidden" />
+                      </fieldset>
+                    ) : (
+                      <div class="form-group" data-reveal="up" data-delay={index * 0.02}>
+                        <label
+                          for={field.name}
+                          class="block text-sm text-muted-foreground tracking-wider mb-2"
+                        >
+                          {field.label}
+                          {field.required && ' *'}
+                        </label>
+                        {field.type === 'textarea' ? (
+                          <textarea
+                            id={field.name}
+                            name={field.name}
+                            rows="4"
+                            required={field.required}
+                            placeholder={field.placeholder}
+                            class="w-full bg-transparent border-b border-border py-3 text-lg focus:border-accent focus:outline-none transition-colors duration-300 resize-none placeholder:text-muted-foreground/40"
+                          />
+                        ) : field.type === 'select' ? (
+                          <select
+                            id={field.name}
+                            name={field.name}
+                            required={field.required}
+                            class="w-full bg-transparent border-b border-border py-3 text-lg focus:border-accent focus:outline-none transition-colors duration-300"
+                          >
+                            <option value="">{field.placeholder || 'Select'}</option>
+                            {field.options
+                              .filter((o) => o !== '')
+                              .map((option) => (
+                                <option value={option}>{option}</option>
+                              ))}
+                          </select>
+                        ) : (
+                          <input
+                            type={field.type}
+                            id={field.name}
+                            name={field.name}
+                            required={field.required}
+                            placeholder={field.placeholder}
+                            autocomplete={field.autocomplete}
+                            class="w-full bg-transparent border-b border-border py-3 text-lg focus:border-accent focus:outline-none transition-colors duration-300 placeholder:text-muted-foreground/40"
+                          />
+                        )}
+                        <p class="form-error text-sm text-red-500 mt-1 hidden" />
+                      </div>
+                    ),
+                  )}
+
+                  <div data-reveal="up" data-delay="0.2">
+                    <button
+                      type="submit"
+                      id="submit-btn"
+                      class="btn btn-gold w-full relative overflow-hidden"
+                      data-magnetic="0.3"
+                    >
+                      <span id="btn-text">{cf7.submitLabel}</span>
+                      <span
+                        id="btn-loading"
+                        class="hidden absolute inset-0 flex items-center justify-center"
+                      >
+                        <svg class="animate-spin h-5 w-5" viewBox="0 0 24 24" fill="none">
+                          <circle
+                            class="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            stroke-width="4"
+                          />
+                          <path
+                            class="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                          />
+                        </svg>
+                      </span>
+                    </button>
+                  </div>
+                </form>
+              ) : (
+                <div id="form-error-global" class="text-center py-16">
+                  <h2 class="text-4xl md:text-5xl font-bold mb-4">SOMETHING WENT WRONG.</h2>
+                  <p class="text-muted-foreground text-lg mb-8">
+                    Please try again or WhatsApp us directly.
+                  </p>
+                  {whatsappUrl && (
+                    <a
+                      href={whatsappUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="btn btn-gold"
+                    >
+                      WHATSAPP US →
+                    </a>
+                  )}
+                </div>
+              )
+            }
+
+            <div id="form-success" class="hidden text-center py-16">
+              <h2 class="text-4xl md:text-5xl font-bold mb-4">YOU'RE ON OUR RADAR.</h2>
+              <p class="text-muted-foreground text-lg">
+                {cf7?.successMessage || "We'll get back to you soon."}
+              </p>
+              <a
+                href="/"
+                class="inline-block mt-8 text-accent text-sm tracking-wider hover:underline"
+                >← BACK HOME</a
+              >
+            </div>
+
+            {
+              cf7 && (
+                <div id="form-error-global" class="hidden text-center py-16">
+                  <h2 class="text-4xl md:text-5xl font-bold mb-4">SOMETHING WENT WRONG.</h2>
+                  <p class="text-muted-foreground text-lg mb-8">
+                    Please try again or WhatsApp us directly.
+                  </p>
+                  {whatsappUrl && (
+                    <a
+                      href={whatsappUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="btn btn-gold"
+                    >
+                      WHATSAPP US →
+                    </a>
+                  )}
+                </div>
+              )
+            }
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+  <Footer />
+
+  <script>
+    import { initScrollReveal, initTextReveal, cleanupAnimations } from '../animations/reveal';
+    import { initMagneticButtons } from '../animations/magnetic';
+
+    function setGroupError(field: HTMLElement, valid: boolean, msg: string): boolean {
+      const error = field.querySelector('.form-error') as HTMLElement;
+      const input = field.querySelector('input, textarea, select') as HTMLInputElement;
+      if (error) {
+        error.textContent = valid ? '' : msg;
+        error.classList.toggle('hidden', valid);
+      }
+      if (input) {
+        input.classList.toggle('border-red-500', !valid);
+        input.classList.toggle('border-border', valid);
+      }
+      return valid;
+    }
+
+    function validateField(field: HTMLElement): boolean {
+      const radios = Array.from(field.querySelectorAll<HTMLInputElement>('input[type="radio"]'));
+      if (radios.length) {
+        const required = radios.some((r) => r.required);
+        const checked = radios.some((r) => r.checked);
+        return setGroupError(field, !required || checked, 'Please choose an option.');
+      }
+
+      const input = field.querySelector('input, textarea, select') as HTMLInputElement;
+      if (!input) return true;
+
+      let valid = true;
+      let msg = '';
+
+      if (input.required && !input.value.trim()) {
+        valid = false;
+        msg = 'This field is required.';
+      } else if (input.type === 'email' && input.value) {
+        valid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input.value);
+        msg = valid ? '' : 'Enter a valid email address.';
+      } else if (input.type === 'url' && input.value) {
+        try {
+          new URL(input.value);
+        } catch {
+          valid = false;
+          msg = 'Enter a valid URL.';
+        }
+      } else if (input.type === 'tel' && input.value) {
+        valid = /^[\d\s\-+()]{7,}$/.test(input.value);
+        msg = valid ? '' : 'Enter a valid phone number.';
+      }
+
+      return setGroupError(field, valid, msg);
+    }
+
+    let inited = false;
+
+    function init() {
+      if (inited || !document.querySelector('main[data-page="contact"]')) return;
+      inited = true;
+
+      cleanupAnimations();
+      initScrollReveal();
+      initTextReveal();
+      initMagneticButtons();
+
+      const form = document.getElementById('contact-form') as HTMLFormElement;
+      const successMessage = document.getElementById('form-success');
+      const errorMessage = document.getElementById('form-error-global');
+      const btnText = document.getElementById('btn-text');
+      const btnLoading = document.getElementById('btn-loading');
+      const submitBtn = document.getElementById('submit-btn') as HTMLButtonElement;
+
+      if (!form) return;
+
+      // Validate on blur / input
+      form.querySelectorAll('.form-group').forEach((group) => {
+        const input = group.querySelector('input, textarea, select');
+        input?.addEventListener('blur', () => validateField(group as HTMLElement));
+        input?.addEventListener('change', () => validateField(group as HTMLElement));
+        input?.addEventListener('input', () => {
+          const error = group.querySelector('.form-error');
+          if (error && !error.classList.contains('hidden')) {
+            validateField(group as HTMLElement);
+          }
+        });
+      });
+
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        // Validate all fields
+        const groups = form.querySelectorAll('.form-group');
+        let allValid = true;
+        groups.forEach((group) => {
+          if (!validateField(group as HTMLElement)) allValid = false;
+        });
+
+        if (!allValid) return;
+
+        // Show loading
+        btnText?.classList.add('hidden');
+        btnLoading?.classList.remove('hidden');
+        submitBtn.disabled = true;
+
+        try {
+          const restBase = form.dataset.wpRest || '';
+          const cf7Id = form.dataset.cf7Id || '';
+          const formData = new FormData(form);
+
+          const cf7 = new FormData();
+          cf7.append('_wpcf7', cf7Id);
+          cf7.append('_wpcf7_version', '6.1.7');
+          cf7.append('_wpcf7_unit_tag', `wpcf7-f${cf7Id}-o1`);
+          cf7.append('_wpcf7_container_post', '0');
+          // Forward every CF7-tagged field (`your-*`) exactly as named in the WP editor.
+          formData.forEach((value, key) => cf7.append(key, String(value)));
+
+          const response = await fetch(
+            `${restBase}/contact-form-7/v1/contact-forms/${cf7Id}/feedback`,
+            {
+              method: 'POST',
+              body: cf7,
+              headers: { Accept: 'application/json' },
+            },
+          );
+          const result = await response.json();
+
+          if (result.status === 'mail_sent') {
+            form.style.display = 'none';
+            successMessage?.classList.remove('hidden');
+          } else {
+            throw new Error(result.message || 'Submission failed');
+          }
+        } catch (err) {
+          console.error('Contact form submission failed:', err);
+          btnText?.classList.remove('hidden');
+          btnLoading?.classList.add('hidden');
+          submitBtn.disabled = false;
+          errorMessage?.classList.remove('hidden');
+        }
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', init);
+    document.addEventListener('astro:page-load', init);
+    document.addEventListener('astro:before-swap', () => {
+      inited = false;
+    });
+  </script>
+</BaseLayout>

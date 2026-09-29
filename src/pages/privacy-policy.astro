@@ -1,0 +1,40 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Header from '../components/layout/Header.astro';
+import Footer from '../components/layout/Footer.astro';
+import LegalContent from '../components/ui/LegalContent.astro';
+import LineartField from '../components/ui/LineartField.astro';
+import { getPageContent } from '../lib/data';
+
+const page = await getPageContent('/privacy-policy/');
+const title = page?.title || 'Privacy Policy';
+---
+
+<BaseLayout title={title} seo={page?.seo}>
+  <Header />
+  <main id="main-content" data-page="privacy" transition:name="page">
+    <section class="pt-32 pb-24 relative overflow-hidden">
+      <LineartField />
+      <div class="container relative z-10">
+        <div class="max-w-3xl mx-auto">
+          <LegalContent title={title} content={page?.content || ''} modified={page?.modified} />
+        </div>
+      </div>
+    </section>
+  </main>
+  <Footer />
+
+  <script>
+    import { initScrollReveal, initTextReveal, cleanupAnimations } from '../animations/reveal';
+    let inited = false;
+
+    function init() {
+      if (inited || !document.querySelector('main[data-page="privacy"]')) return;
+      inited = true;
+      cleanupAnimations(); initScrollReveal(); initTextReveal();
+    }
+    document.addEventListener('DOMContentLoaded', init);
+    document.addEventListener('astro:page-load', init);
+    document.addEventListener('astro:before-swap', () => { inited = false; });
+  </script>
+</BaseLayout>

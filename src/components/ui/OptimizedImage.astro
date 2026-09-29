@@ -1,0 +1,41 @@
+---
+interface Props {
+  src: string;
+  alt: string;
+  width: number;
+  height: number;
+  loading?: 'lazy' | 'eager';
+  fetchpriority?: 'high' | 'low' | 'auto';
+  class?: string;
+  sizes?: string;
+  widths?: number[];
+}
+
+const {
+  src,
+  alt,
+  width,
+  height,
+  loading = 'lazy',
+  fetchpriority = 'auto',
+  class: className = '',
+  sizes = '(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw',
+  widths = [640, 768, 1024, 1280, 1600],
+} = Astro.props;
+
+const supportedWidths = widths.filter((w) => w <= width);
+const srcSet = supportedWidths.map((w) => `${src}?w=${w} ${w}w`).join(', ');
+---
+
+<img
+  src={src}
+  alt={alt}
+  width={width}
+  height={height}
+  loading={loading}
+  fetchpriority={fetchpriority}
+  decoding="async"
+  class={className}
+  sizes={sizes}
+  srcset={srcSet}
+/>

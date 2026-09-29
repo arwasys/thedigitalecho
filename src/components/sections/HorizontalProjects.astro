@@ -1,0 +1,57 @@
+---
+import LineartField from '../ui/LineartField.astro';
+import type { Project } from '../../types';
+
+interface Props {
+  projects: Project[];
+  title1?: string;
+  title2?: string;
+  viewAllLabel?: string;
+}
+
+const {
+  projects,
+  title1 = 'WORK',
+  title2 = '> WORDS.',
+  viewAllLabel = 'VIEW ALL PROJECTS →',
+} = Astro.props;
+---
+
+<section class="border-b border-border overflow-hidden relative" data-horizontal>
+  <LineartField />
+  <div class="container pt-24 pb-8 md:pt-48 md:pb-12 relative z-10">
+    <div class="flex items-end justify-between">
+      <h2 class="text-4xl md:text-6xl lg:text-8xl font-bold tracking-tight leading-none" data-text-reveal>
+        <span class="reveal-line block">{title1}</span>
+        <span class="reveal-line block text-accent">{title2}</span>
+      </h2>
+      <a href="/projects/" class="text-sm tracking-wider uppercase hover:text-accent transition-colors duration-300 hidden md:block" data-reveal="fade">
+        {viewAllLabel}
+      </a>
+    </div>
+  </div>
+  <div class="horizontal-items flex gap-6 px-6 md:px-12 pb-24 md:pb-48">
+    {projects.slice(0, 6).map((project) => (
+      <a
+        href={`/projects/${project.slug}/`}
+        class="flex-shrink-0 w-[85vw] md:w-[60vw] lg:w-[45vw] group relative overflow-hidden aspect-[16/10]"
+        data-cursor="view"
+        data-cursor-label="VIEW"
+      >
+        <img
+          src={project.heroImage?.node?.sourceUrl || 'https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?q=80&w=800&h=450&auto=format&fit=crop'}
+          alt={project.title}
+          class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+          loading="lazy"
+          transition:name={`project-image-${project.slug}`}
+          transition:animate="fade"
+        />
+        <div class="absolute inset-0 bg-gradient-to-t from-bg/90 via-bg/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex flex-col justify-end p-8">
+          <p class="text-accent text-sm tracking-wider mb-2">{project.clientName}</p>
+          <h3 class="text-2xl md:text-4xl font-bold mb-4">{project.title}</h3>
+          <p class="text-accent text-sm tracking-wider">VIEW CASE STUDY →</p>
+        </div>
+      </a>
+    ))}
+  </div>
+</section>

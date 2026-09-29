@@ -1,0 +1,93 @@
+---
+import '../styles/global.css';
+import { getSiteSettings } from '../lib/data';
+import Cursor from '../components/ui/Cursor.astro';
+import Lightbox from '../components/ui/Lightbox.astro';
+import Analytics from '../components/seo/Analytics.astro';
+import FullscreenNav from '../components/layout/FullscreenNav.astro';
+import { ClientRouter } from 'astro:transitions';
+import type { SEO } from '../types';
+
+interface Props {
+  title: string;
+  description?: string;
+  ogImage?: string;
+  seo?: SEO;
+}
+
+const {
+  title,
+  description,
+  ogImage = '/og-image.jpg',
+  seo,
+} = Astro.props;
+
+const settings = await getSiteSettings();
+const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'http://localhost:4321';
+
+const seoTitle = seo?.title || (title === 'Home' ? `${settings.title} | ${settings.description}` : `${title} | ${settings.title}`);
+const fullTitle = seoTitle;
+const metaDescription = seo?.description || description || settings.description;
+const canonicalUrl = seo?.canonical || `${siteUrl}${Astro.url.pathname}`;
+const seoOgImage = seo?.ogImage || ogImage;
+const seoOgTitle = seo?.ogTitle || fullTitle;
+const seoOgDescription = seo?.ogDescription || metaDescription;
+const seoTwitterTitle = seo?.twitterTitle || fullTitle;
+const seoTwitterDescription = seo?.twitterDescription || metaDescription;
+const seoTwitterImage = seo?.twitterImage || seoOgImage;
+---
+
+<!doctype html>
+<html lang="en" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content={metaDescription} />
+    <link rel="canonical" href={canonicalUrl} />
+
+    <!-- Open Graph -->
+    <meta property="og:title" content={seoOgTitle} />
+    <meta property="og:description" content={seoOgDescription} />
+    <meta property="og:image" content={`${siteUrl}${seoOgImage}`} />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={settings.title} />
+
+    <!-- Twitter/X -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={seoTwitterTitle} />
+    <meta name="twitter:description" content={seoTwitterDescription} />
+    <meta name="twitter:image" content={`${siteUrl}${seoTwitterImage}`} />
+
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" media="print" onload="this.media='all'" />
+    <noscript>
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" />
+    </noscript>
+    <title>{fullTitle}</title>
+    <ClientRouter />
+    <Analytics />
+  </head>
+  <body class="min-h-screen bg-bg text-text antialiased">
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+    <FullscreenNav />
+    <slot />
+    <Cursor />
+    <Lightbox />
+    <script>
+      import { initCursor } from '../animations/cursor';
+      initCursor();
+      document.addEventListener('astro:page-load', initCursor);
+    </script>
+    <script>
+      import { initSmoothScroll, destroySmoothScroll } from '../animations/smooth-scroll';
+
+      initSmoothScroll();
+      document.addEventListener('astro:page-load', initSmoothScroll);
+      document.addEventListener('astro:before-swap', destroySmoothScroll);
+    </script>
+  </body>
+</html>

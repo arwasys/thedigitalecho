@@ -1,0 +1,135 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Header from '../../components/layout/Header.astro';
+import Footer from '../../components/layout/Footer.astro';
+import LineartField from '../../components/ui/LineartField.astro';
+import ArticleSchema from '../../components/seo/ArticleSchema.astro';
+import BreadcrumbSchema from '../../components/seo/BreadcrumbSchema.astro';
+import { getPostBySlug, getPostSlugs } from '../../lib/data';
+
+export async function getStaticPaths() {
+  const slugs = await getPostSlugs();
+  return slugs.map((slug) => ({ params: { slug } }));
+}
+
+const { slug } = Astro.params;
+const post = await getPostBySlug(slug!);
+
+if (!post) {
+  return Astro.redirect('/404');
+}
+
+const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://thedigitalecho.com';
+---
+
+<BaseLayout title={post.title} description={post.excerpt} seo={post.seo}>
+  <ArticleSchema
+    title={post.title}
+    description={post.excerpt}
+    url={`${siteUrl}/blog/${post.slug}/`}
+    image={post.featuredImage?.node.sourceUrl}
+    datePublished={post.publishedDate}
+    dateModified={post.modifiedDate}
+  />
+  <BreadcrumbSchema items={[
+    { name: 'Home', url: siteUrl },
+    { name: 'The Drop', url: `${siteUrl}/blog/` },
+    { name: post.title, url: `${siteUrl}/blog/${post.slug}/` },
+  ]} />
+  <Header />
+  <main id="main-content" data-page="post" transition:name="page">
+    <article>
+      <section class="pt-32 pb-16 relative overflow-hidden">
+        <LineartField />
+        <div class="container relative z-10">
+          <div class="max-w-4xl mx-auto">
+            <div class="flex gap-2 mb-6" data-reveal="fade">
+              {post.categories.map((cat) => (
+                <span class="text-xs text-accent tracking-wider">{cat.name}</span>
+              ))}
+            </div>
+            <h1 class="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-none mb-8" data-text-reveal>
+              <span class="reveal-line block">{post.title}</span>
+            </h1>
+            <div class="flex items-center gap-4 text-muted-foreground" data-reveal="up" data-delay="0.2">
+              <span>{post.author.name}</span>
+              <span>•</span>
+              <time datetime={post.publishedDate}>
+                {new Date(post.publishedDate).toLocaleDateString('en-US', {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric',
+                })}
+              </time>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {post.featuredImage && (
+        <section class="pb-16">
+          <div class="container">
+            <div class="max-w-5xl mx-auto aspect-[16/9] overflow-hidden" data-image-reveal>
+              <img
+                src={post.featuredImage.node.sourceUrl}
+                alt={post.featuredImage.node.altText}
+                width={post.featuredImage.node.width || 1200}
+                height={post.featuredImage.node.height || 630}
+                class="w-full h-full object-cover"
+                fetchpriority="high"
+                transition:name={`blog-image-${post.slug}`}
+                transition:animate="fade"
+              />
+            </div>
+          </div>
+        </section>
+      )}
+
+      <section class="pb-24">
+        <div class="container">
+          <div class="max-w-3xl mx-auto prose prose-invert prose-lg">
+            <Fragment set:html={post.content} />
+          </div>
+        </div>
+      </section>
+    </article>
+
+    <section class="py-24 border-t border-border relative overflow-hidden">
+      <LineartField />
+      <div class="container text-center relative z-10">
+        <h2 class="text-4xl md:text-6xl font-bold mb-8" data-text-reveal>
+          <span class="reveal-line block">WANT MORE?</span>
+        </h2>
+        <div data-reveal="up" data-delay="0.2">
+          <a
+            href="/blog/"
+            class="btn btn-black"
+          >
+            ← BACK TO THE DROP
+          </a>
+        </div>
+      </div>
+    </section>
+  </main>
+  <Footer />
+
+  <script>
+    import { initScrollReveal, initTextReveal, initImageReveal, cleanupAnimations } from '../../animations/reveal';
+
+    let inited = false;
+
+    function init() {
+      if (inited || !document.querySelector('main[data-page="post"]')) return;
+      inited = true;
+
+      cleanupAnimations();
+      initScrollReveal();
+      initTextReveal();
+      initImageReveal();
+    }
+
+    document.addEventListener('DOMContentLoaded', init);
+    document.addEventListener('astro:page-load', init);
+    document.addEventListener('astro:before-swap', () => { inited = false; });
+  </script>
+</BaseLayout>

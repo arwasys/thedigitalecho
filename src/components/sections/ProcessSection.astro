@@ -1,0 +1,71 @@
+---
+import LineartField from '../ui/LineartField.astro';
+import type { ProcessStep } from '../../types';
+
+interface Props {
+  steps?: ProcessStep[];
+  title1?: string;
+  title2?: string;
+}
+
+const {
+  steps = [
+    { num: '01', title: 'Discovery', desc: 'We learn your brand, goals, and audience.' },
+    { num: '02', title: 'Strategy', desc: 'We craft a plan that actually works.' },
+    { num: '03', title: 'Create', desc: 'We produce content that stops the scroll.' },
+    { num: '04', title: 'Echo', desc: 'We amplify your brand everywhere.' },
+  ],
+  title1 = 'CREATIVE',
+  title2 = 'PROCESS.',
+} = Astro.props;
+---
+
+<section class="py-24 border-b border-border relative overflow-hidden">
+  <LineartField />
+  <div class="container relative z-10">
+    <h2 class="text-4xl md:text-6xl lg:text-8xl font-bold tracking-tight leading-none mb-16" data-text-reveal>
+      <span class="reveal-line block text-accent-blue">{title1}</span>
+      <span class="reveal-line block">{title2}</span>
+    </h2>
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
+      {steps.map((step, index) => (
+        <div
+          class="text-center md:text-left process-step"
+          style={`animation-delay: ${index * 0.15}s`}
+        >
+          <span class="text-6xl font-bold text-accent block mb-4">{step.num}</span>
+          <h3 class="text-2xl font-bold mb-2">{step.title}</h3>
+          <p class="text-muted-foreground">{step.desc}</p>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .process-step {
+    opacity: 0;
+    transform: translateY(40px);
+    animation: processReveal 0.7s ease forwards;
+  }
+
+  .process-step:nth-child(1) { animation-delay: 0s; }
+  .process-step:nth-child(2) { animation-delay: 0.15s; }
+  .process-step:nth-child(3) { animation-delay: 0.3s; }
+  .process-step:nth-child(4) { animation-delay: 0.45s; }
+
+  @keyframes processReveal {
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .process-step {
+      opacity: 1;
+      transform: none;
+      animation: none;
+    }
+  }
+</style>

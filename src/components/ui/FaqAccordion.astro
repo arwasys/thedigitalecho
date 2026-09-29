@@ -1,0 +1,77 @@
+---
+interface Faq {
+  question: string;
+  answer: string;
+}
+
+interface Props {
+  faqs: Faq[];
+}
+
+const { faqs } = Astro.props;
+---
+
+<div class="max-w-3xl space-y-0 faq-container" data-reveal="up">
+  {faqs.map((faq, index) => (
+    <div class="faq-item border-b border-border" data-faq-index={index}>
+      <button
+        class="faq-trigger w-full text-left py-6 flex items-center justify-between gap-4 group"
+        aria-expanded="false"
+        data-faq-index={index}
+      >
+        <h3 class="text-xl font-bold group-hover:text-accent transition-colors duration-300">{faq.question}</h3>
+        <svg
+          class="faq-icon w-5 h-5 shrink-0 text-muted-foreground transition-transform duration-300"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <polyline points="6 9 12 15 18 9" />
+        </svg>
+      </button>
+      <div class="faq-content overflow-hidden" style="max-height: 0; transition: max-height 0.3s ease;">
+        <p class="text-muted-foreground leading-relaxed pb-6">{faq.answer}</p>
+      </div>
+    </div>
+  ))}
+</div>
+
+<script>
+  function handleFaqClick(e: Event) {
+    const trigger = (e.target as HTMLElement).closest('.faq-trigger') as HTMLElement | null;
+    if (!trigger) return;
+
+    const index = trigger.getAttribute('data-faq-index');
+    const item = document.querySelector(`.faq-item[data-faq-index="${index}"]`) as HTMLElement | null;
+    const content = item?.querySelector('.faq-content') as HTMLElement | null;
+    const icon = trigger.querySelector('.faq-icon') as HTMLElement | null;
+    const isExpanded = trigger.getAttribute('aria-expanded') === 'true';
+
+    // Close all others
+    document.querySelectorAll('.faq-item').forEach((otherItem) => {
+      if (otherItem !== item) {
+        const otherContent = otherItem.querySelector('.faq-content') as HTMLElement | null;
+        const otherTrigger = otherItem.querySelector('.faq-trigger') as HTMLElement | null;
+        const otherIcon = otherItem.querySelector('.faq-icon') as HTMLElement | null;
+        otherTrigger?.setAttribute('aria-expanded', 'false');
+        if (otherContent) otherContent.style.maxHeight = '0';
+        otherIcon?.style.setProperty('transform', 'rotate(0deg)');
+      }
+    });
+
+    // Toggle current
+    if (isExpanded) {
+      trigger.setAttribute('aria-expanded', 'false');
+      if (content) content.style.maxHeight = '0';
+      icon?.style.setProperty('transform', 'rotate(0deg)');
+    } else {
+      trigger.setAttribute('aria-expanded', 'true');
+      if (content) content.style.maxHeight = content.scrollHeight + 'px';
+      icon?.style.setProperty('transform', 'rotate(180deg)');
+    }
+  }
+
+  // Use a single delegated listener on document that never gets removed
+  document.addEventListener('click', handleFaqClick);
+</script>

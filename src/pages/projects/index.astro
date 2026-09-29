@@ -1,0 +1,84 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Header from '../../components/layout/Header.astro';
+import Footer from '../../components/layout/Footer.astro';
+import InnerHero from '../../components/ui/InnerHero.astro';
+import OptimizedImage from '../../components/ui/OptimizedImage.astro';
+import { getProjects, getHeroByPage } from '../../lib/data';
+
+const [projects, hero] = await Promise.all([getProjects(), getHeroByPage('/projects/')]);
+---
+
+<BaseLayout title="Projects">
+  <Header />
+  <main id="main-content" data-page="projects" transition:name="page">
+    <InnerHero
+      hero={hero}
+      fallback={{
+        smallText: 'Our Work',
+        title: 'Digital',
+        title1: 'Marketing & Content Production Projects',
+        description:
+          "We Could Tell You We're Good.\nBut We'd Rather Show You.\nWelcome to the part where we stop talking.\nExplore projects we've worked on across content production, photography, videography, social media and digital marketing.",
+      }}
+      marquee={projects.map((project) => project.title)}
+      indexLabel="Our Work · 02"
+      countLabel={projects.length ? `${String(projects.length).padStart(2, '0')} Projects` : ''}
+    />
+
+    <section class="py-24">
+      <div class="container">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+          {projects.map((project, index) => (
+            <a
+              href={`/projects/${project.slug}/`}
+              class="group block relative overflow-hidden aspect-[16/10]"
+              data-reveal="up"
+              data-delay={index * 0.1}
+            >
+              <OptimizedImage
+                src={project.heroImage.node.sourceUrl}
+                alt={project.heroImage.node.altText}
+                width={project.heroImage.node.width || 1600}
+                height={project.heroImage.node.height || 900}
+                class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                loading="lazy"
+                transition:name={`project-image-${project.slug}`}
+                transition:animate="fade"
+              />
+              <div class="absolute inset-0 bg-bg/60 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-end p-8">
+                <div>
+                  <p class="text-sm text-muted-foreground mb-2">{project.clientName}</p>
+                  <h2 class="text-2xl md:text-3xl font-bold">{project.title}</h2>
+                  <p class="text-accent mt-4">VIEW CASE STUDY →</p>
+                </div>
+              </div>
+            </a>
+          ))}
+        </div>
+      </div>
+    </section>
+  </main>
+  <Footer />
+
+  <script>
+    import { initScrollReveal, initTextReveal, cleanupAnimations } from '../../animations/reveal';
+    import { initMagneticButtons } from '../../animations/magnetic';
+
+    let inited = false;
+
+    function init() {
+      if (inited || !document.querySelector('main[data-page="projects"]')) return;
+      inited = true;
+
+      cleanupAnimations();
+      initScrollReveal();
+      initTextReveal();
+      initMagneticButtons();
+    }
+
+    document.addEventListener('DOMContentLoaded', init);
+    document.addEventListener('astro:page-load', init);
+    document.addEventListener('astro:before-swap', () => { inited = false; });
+  </script>
+</BaseLayout>

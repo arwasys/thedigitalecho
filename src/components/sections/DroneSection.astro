@@ -1,0 +1,58 @@
+---
+import LineartField from '../ui/LineartField.astro';
+
+interface Props {
+  eyebrow?: string;
+  title1?: string;
+  title2?: string;
+  title3?: string;
+  body?: string;
+  buttonLabel?: string;
+  buttonUrl?: string;
+}
+
+const {
+  eyebrow = 'AERIAL SERVICES',
+  title1 = 'CHANGE',
+  title2 = 'THE',
+  title3 = 'PERSPECTIVE.',
+  body = 'Drone photography and videography that reveals your brand from angles no one else can capture.',
+  buttonLabel = 'EXPLORE DRONE SERVICES →',
+  buttonUrl = '/services/drone-photography/',
+} = Astro.props;
+---
+
+<section class="relative min-h-screen flex items-center justify-center overflow-hidden">
+  <LineartField />
+
+  <!-- Content -->
+  <div class="container relative z-10 text-center py-32">
+    <p class="text-sm tracking-[0.3em] uppercase text-accent-blue mb-6" data-reveal="fade">
+      {eyebrow}
+    </p>
+    <h2
+      class="text-6xl md:text-8xl lg:text-[10rem] font-bold tracking-tight leading-[0.85]"
+      data-text-reveal
+    >
+      <span class="reveal-line block text-accent-blue">{title1}</span>
+      <span class="reveal-line block">{title2}</span>
+      <span class="reveal-line block text-accent">{title3}</span>
+    </h2>
+    <p
+      class="text-lg md:text-xl text-text/70 max-w-xl mx-auto mt-10 leading-relaxed"
+      data-reveal="up"
+      data-delay="0.3"
+    >
+      {body}
+    </p>
+    <div class="mt-10" data-reveal="up" data-delay="0.5">
+      <a
+        href={buttonUrl}
+        class="btn btn-gold"
+        data-magnetic="0.3"
+      >
+        {buttonLabel}
+      </a>
+    </div>
+  </div>
+</section>

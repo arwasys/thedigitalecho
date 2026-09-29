@@ -1,0 +1,155 @@
+---
+import type { BrandStatement as BrandStatementData } from '../../types';
+import { mockBrandStatement } from '../../lib/mock-data/brandStatement';
+
+interface Props {
+  statement?: BrandStatementData | null;
+}
+
+const { statement } = Astro.props;
+const data = statement ?? mockBrandStatement;
+const { title, title1, title2, fullTitle, paragraphs, reels } = data;
+---
+<section class="relative overflow-hidden border-b border-border py-24 md:py-36 bg-bg" data-brand-statement>
+  <!-- Background image (content-creation studio scene) -->
+  <img
+    src="https://images.unsplash.com/photo-1516035069371-29a1b244cc32?q=80&w=1920&auto=format&fit=crop"
+    alt=""
+    class="absolute inset-0 w-full h-full object-cover opacity-20"
+    loading="lazy"
+    aria-hidden="true"
+    data-bs-bg
+  />
+  <div
+    class="absolute inset-0 pointer-events-none"
+    style="background: linear-gradient(to bottom, rgba(18,16,12,0.85) 0%, rgba(18,16,12,0.9) 50%, rgba(18,16,12,0.95) 100%);"
+    aria-hidden="true"
+  ></div>
+
+  <div class="container relative z-10">
+    <div class="grid md:grid-cols-2 gap-8 md:gap-12 items-stretch">
+      <!-- Left: camera viewfinder card -->
+      <div class="relative overflow-hidden rounded-[3rem] md:rounded-[5rem] border border-border bg-[#0D0B07] text-[#F2EEE5] p-8 md:p-12" data-reveal="up">
+        <!-- Corner brackets -->
+        <span class="absolute top-6 left-6 w-8 h-8 border-t-2 border-l-2 border-accent rounded-tl-2xl" aria-hidden="true"></span>
+        <span class="absolute top-6 right-6 w-8 h-8 border-t-2 border-r-2 border-accent rounded-tr-2xl" aria-hidden="true"></span>
+        <span class="absolute bottom-6 left-6 w-8 h-8 border-b-2 border-l-2 border-accent rounded-bl-2xl" aria-hidden="true"></span>
+        <span class="absolute bottom-6 right-6 w-8 h-8 border-b-2 border-r-2 border-accent rounded-br-2xl" aria-hidden="true"></span>
+
+        <!-- Top HUD -->
+        <div class="flex items-center justify-between text-[11px] tracking-[0.2em] uppercase text-white/60 mb-8 md:mb-10 px-2">
+          <span class="flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse" aria-hidden="true"></span>
+            REC · CREATE ECHO
+          </span>
+          <span>ISO 400</span>
+        </div>
+
+        <!-- Title -->
+        <h2 class="text-2xl md:text-[1.5rem] lg:text-[clamp(2rem,3vw,2.75rem)] font-bold tracking-tight leading-tight uppercase brand-statement" data-text-reveal aria-label={fullTitle}>
+          <span class="reveal-line block">{title}</span>
+          {title1 && <span class="reveal-line block text-accent-blue">{title1}</span>}
+          {title2 && <span class="reveal-line block text-accent">{title2}</span>}
+        </h2>
+
+        <!-- Content -->
+        <div class="mt-8 md:mt-10 space-y-5" data-reveal="up">
+          {paragraphs.map((paragraph) => (
+            <p class="text-base md:text-lg leading-relaxed text-white/70" set:html={paragraph} />
+          ))}
+        </div>
+
+        <!-- About CTA -->
+        <div class="mt-8 md:mt-10" data-reveal="up" data-delay="0.15">
+          <a
+            href="/about/"
+            class="btn btn-gold"
+            data-magnetic="0.3"
+          >
+            About Us →
+          </a>
+        </div>
+
+        <!-- Bottom HUD -->
+        <div class="flex items-center justify-between text-[11px] tracking-[0.2em] uppercase text-white/60 mt-8 md:mt-10 px-2">
+          <span class="flex items-center gap-2">
+            <span class="w-4 h-4 rounded-full border border-accent" aria-hidden="true"></span>
+            TDE / 01
+          </span>
+          <span>REC 4K · 24FPS</span>
+        </div>
+      </div>
+
+      <!-- Right: vertical video marquee -->
+      <div class="relative min-h-[560px] md:min-h-0 md:-my-36 overflow-hidden" data-reveal="up">
+        <div class="bs-track absolute top-0 left-0 w-full flex flex-col">
+          <!-- Videos (set 1) -->
+          {reels.map((src) => (
+            <div class="bs-slide flex-shrink-0 rounded-3xl overflow-hidden border border-border mb-6">
+              <video class="w-full h-full object-cover" autoplay muted loop playsinline>
+                <source src={src} type="video/mp4" />
+              </video>
+            </div>
+          ))}
+          <!-- Videos (duplicate for seamless loop) -->
+          {reels.map((src) => (
+            <div class="bs-slide flex-shrink-0 rounded-3xl overflow-hidden border border-border mb-6" aria-hidden="true">
+              <video class="w-full h-full object-cover" autoplay muted loop playsinline>
+                <source src={src} type="video/mp4" />
+              </video>
+            </div>
+          ))}
+        </div>
+        <!-- Edge fades -->
+        <div class="absolute top-0 left-0 right-0 h-24 bg-gradient-to-b from-bg/70 to-transparent pointer-events-none" aria-hidden="true"></div>
+        <div class="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-bg/70 to-transparent pointer-events-none" aria-hidden="true"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  import { gsap } from 'gsap';
+
+  let marquee: gsap.core.Tween | null = null;
+  let ro: ResizeObserver | null = null;
+
+  function initMarquee() {
+    const track = document.querySelector('.bs-track');
+    if (!track) return;
+
+    const wrap = track.parentElement;
+    if (wrap) {
+      const setH = () => wrap.style.setProperty('--bs-h', `${wrap.clientHeight}px`);
+      setH();
+      if (ro) ro.disconnect();
+      ro = new ResizeObserver(setH);
+      ro.observe(wrap);
+    }
+
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    if (marquee) marquee.kill();
+
+    const slidesPerSet = Math.max(1, track.querySelectorAll('.bs-slide').length / 2);
+
+    marquee = gsap.to(track, {
+      yPercent: -50,
+      ease: 'none',
+      duration: Math.max(22, slidesPerSet * 7.3),
+      repeat: -1,
+    });
+  }
+
+  initMarquee();
+  document.addEventListener('astro:page-load', initMarquee);
+</script>
+
+<style>
+  .brand-statement .reveal-line {
+    overflow: visible;
+  }
+
+  .bs-slide {
+    height: var(--bs-h, 560px);
+  }
+</style>

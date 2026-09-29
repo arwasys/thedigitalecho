@@ -1,0 +1,29 @@
+---
+import { getSiteSettings, getMenus } from '../../lib/data';
+
+const [settings, menus] = await Promise.all([getSiteSettings(), getMenus()]);
+
+const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://thedigitalecho.com';
+
+const name = settings.title || 'The Digital Echo';
+const url = siteUrl;
+const logo = settings.logo || undefined;
+const description =
+  settings.description || 'Gen Z-led digital marketing and content production company creating content, campaigns and digital experiences people actually remember.';
+
+const sameAs = menus.footerSocial
+  .map((link) => link.url)
+  .filter((linkUrl) => /^https?:\/\//.test(linkUrl));
+
+const schema: Record<string, unknown> = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name,
+  url,
+  description,
+};
+if (logo) schema.logo = logo;
+if (sameAs.length) schema.sameAs = sameAs;
+---
+
+<script type="application/ld+json" set:html={JSON.stringify(schema)} />

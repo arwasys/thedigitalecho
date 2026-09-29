@@ -1,0 +1,42 @@
+---
+import LineartField from '../ui/LineartField.astro';
+
+interface Props {
+  title?: string;
+  titleAccent?: string;
+  images?: string[];
+}
+
+const {
+  title = 'CONTENT THAT',
+  titleAccent = 'STOPS THE SCROLL.',
+  images = [
+    'https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?q=80&w=600&h=800&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1554048612-b6a482bc67e5?q=80&w=600&h=800&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?q=80&w=600&h=800&auto=format&fit=crop',
+    'https://images.unsplash.com/photo-1542744173-8e7e53415bb0?q=80&w=600&h=800&auto=format&fit=crop',
+  ],
+} = Astro.props;
+
+const slots = [0, 1, 2, 3].map((i) => images[i] || images[i % Math.max(images.length, 1)] || '');
+const alts = ['Content', 'Photography', 'Videography', 'Brand Content'];
+---
+
+<section class="py-24 border-b border-border relative overflow-hidden">
+  <LineartField />
+  <div class="container relative z-10">
+    <h2 class="text-4xl md:text-6xl lg:text-8xl font-bold tracking-tight leading-none mb-16" data-text-reveal>
+      <span class="reveal-line block">{title}</span>
+      <span class="reveal-line block text-accent">{titleAccent}</span>
+    </h2>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4" data-reveal="up">
+      {slots.map((src, index) => (
+        src && (
+          <div class="aspect-[3/4] bg-border/20 overflow-hidden">
+            <img src={src} alt={alts[index]} class="w-full h-full object-cover hover:scale-105 transition-transform duration-700" loading="lazy" />
+          </div>
+        )
+      ))}
+    </div>
+  </div>
+</section>

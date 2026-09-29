@@ -1,0 +1,56 @@
+---
+import LineartField from '../ui/LineartField.astro';
+
+interface Props {
+  title1?: string;
+  titleAccent?: string;
+  body?: string;
+  button1Label?: string;
+  button1Url?: string;
+  button2Label?: string;
+  button2Url?: string;
+}
+
+const {
+  title1 = "LET'S MAKE",
+  titleAccent = 'SOME NOISE.',
+  body = "Got a brand that needs an echo? Let's talk about your next project.",
+  button1Label = "LET'S TALK →",
+  button1Url = '/contact/',
+  button2Label = 'WHATSAPP US →',
+  button2Url = '',
+} = Astro.props;
+---
+
+<section class="py-24 md:py-48 border-b border-border relative overflow-hidden">
+  <LineartField />
+  <div class="container text-center relative z-10">
+    <h2 class="text-4xl md:text-6xl lg:text-8xl font-bold tracking-tight leading-none mb-8" data-text-reveal>
+      <span class="reveal-line block text-accent-blue">{title1}</span>
+      <span class="reveal-line block text-accent">{titleAccent}</span>
+    </h2>
+    <p class="text-lg text-muted-foreground max-w-xl mx-auto mb-12" data-reveal="up" data-delay="0.2">
+      {body}
+    </p>
+    <div class="flex flex-col sm:flex-row gap-4 justify-center" data-reveal="up" data-delay="0.3">
+      <a
+        href={button1Url}
+        class="btn btn-gold"
+        data-magnetic="0.3"
+      >
+        {button1Label}
+      </a>
+      {button2Url && (
+        <a
+          href={button2Url}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="btn btn-blue"
+          data-magnetic="0.3"
+        >
+          {button2Label}
+        </a>
+      )}
+    </div>
+  </div>
+</section>

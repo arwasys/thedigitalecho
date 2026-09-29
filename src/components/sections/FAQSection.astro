@@ -1,0 +1,22 @@
+---
+import LineartField from '../ui/LineartField.astro';
+import FaqAccordion from '../ui/FaqAccordion.astro';
+import type { FAQ } from '../../types';
+
+interface Props {
+  faqs: FAQ[];
+  title?: string;
+}
+
+const { faqs, title = 'FAQ.' } = Astro.props;
+---
+
+<section class="py-24 border-b border-border relative overflow-hidden">
+  <LineartField />
+  <div class="container relative z-10">
+    <h2 class="text-4xl md:text-6xl lg:text-8xl font-bold tracking-tight leading-none mb-16" data-text-reveal>
+      <span class="reveal-line block">{title}</span>
+    </h2>
+    <FaqAccordion faqs={faqs} />
+  </div>
+</section>

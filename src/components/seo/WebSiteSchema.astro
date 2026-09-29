@@ -1,0 +1,18 @@
+---
+import { getSiteSettings } from '../../lib/data';
+
+const settings = await getSiteSettings();
+const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://thedigitalecho.com';
+
+const name = settings.title || 'The Digital Echo';
+const url = siteUrl;
+
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name,
+  url,
+};
+---
+
+<script type="application/ld+json" set:html={JSON.stringify(schema)} />

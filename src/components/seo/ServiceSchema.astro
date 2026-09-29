@@ -1,0 +1,26 @@
+---
+interface ServiceSchemaProps {
+  name: string;
+  description: string;
+  url: string;
+}
+
+const { name, description, url } = Astro.props as ServiceSchemaProps;
+
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'Service',
+  name,
+  description,
+  url,
+  provider: {
+    '@type': 'Organization',
+    name: 'The Digital Echo',
+    url: 'https://thedigitalecho.com',
+  },
+  areaServed: 'IN',
+  serviceType: name,
+};
+---
+
+<script type="application/ld+json" set:html={JSON.stringify(schema)} />

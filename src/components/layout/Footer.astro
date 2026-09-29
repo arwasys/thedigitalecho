@@ -1,0 +1,147 @@
+---
+import { getSiteSettings, getMenus, getSiteData } from '../../lib/data';
+
+const [settings, menus, siteData] = await Promise.all([getSiteSettings(), getMenus(), getSiteData()]);
+const { footer, contact } = siteData;
+const currentYear = new Date().getFullYear();
+
+// Fallbacks mirror the original hardcoded navigation if WordPress menus are unavailable.
+const fallbackExplore = [
+  { label: 'What We Do', url: '/services/' },
+  { label: 'Our Work', url: '/projects/' },
+  { label: 'The Crew', url: '/about/' },
+  { label: 'The Drop', url: '/blog/' },
+  { label: "Let's Talk", url: '/contact/' },
+];
+
+const fallbackSocial = [
+  { label: 'Instagram', url: 'https://instagram.com/thedigitalecho' },
+  { label: 'LinkedIn', url: 'https://linkedin.com/company/thedigitalecho' },
+  { label: 'Facebook', url: 'https://facebook.com/thedigitalecho' },
+  { label: 'WhatsApp', url: contact.contactWhatsappUrl || 'https://wa.me/' },
+  { label: 'YouTube', url: 'https://youtube.com/@thedigitalecho' },
+];
+
+const exploreLinks = menus.footerExplore.length ? menus.footerExplore : fallbackExplore;
+const platformLinks = menus.footerPlatforms;
+const socialLinks = menus.footerSocial.length ? menus.footerSocial : fallbackSocial;
+
+function isExternal(url: string) {
+  return /^https?:\/\//.test(url);
+}
+---
+
+<footer class="border-t border-border">
+  <div class="container py-16 md:py-24">
+    <!-- Logo -->
+    <div class="mb-12 md:mb-16">
+      <a href="/" class="inline-block hover:opacity-80 transition-opacity duration-300">
+        {settings.logo ? (
+          <img
+            src={settings.logo}
+            alt={settings.title}
+            class="h-10 md:h-12 w-auto"
+          />
+        ) : (
+          <span class="text-lg font-bold tracking-widest uppercase">
+            THE DIGITAL ECHO
+          </span>
+        )}
+      </a>
+      {footer.footerBlurb && (
+        <p class="mt-4 max-w-md text-sm text-muted-foreground">{footer.footerBlurb}</p>
+      )}
+    </div>
+
+    <!-- Links Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16 min-w-0 [overflow-wrap:anywhere]">
+      <!-- Explore -->
+      <div>
+        <h3 class="text-xs font-medium tracking-wider uppercase text-accent-blue mb-6">Navigate</h3>
+        <nav class="flex flex-col gap-3">
+          {exploreLinks.map((link) => (
+            <a
+              href={link.url}
+              class="text-lg hover:text-accent transition-colors duration-300"
+            >
+              {link.label}
+            </a>
+          ))}
+        </nav>
+      </div>
+
+      <!-- Platform -->
+      {platformLinks.length > 0 && (
+        <div>
+          <h3 class="text-xs font-medium tracking-wider uppercase text-accent-blue mb-6">Platform</h3>
+          <nav class="flex flex-col gap-3">
+            {platformLinks.map((link) => (
+              <a
+                href={link.url}
+                class="text-lg hover:text-accent transition-colors duration-300"
+                target={isExternal(link.url) ? '_blank' : undefined}
+                rel={isExternal(link.url) ? 'noopener noreferrer' : undefined}
+              >
+                {link.label}
+              </a>
+            ))}
+          </nav>
+        </div>
+      )}
+
+      <!-- Social -->
+      <div>
+        <h3 class="text-xs font-medium tracking-wider uppercase text-accent-blue mb-6">Connect</h3>
+        <nav class="flex flex-col gap-3">
+          {socialLinks.map((link) => (
+            <a
+              href={link.url}
+              class="text-lg hover:text-accent transition-colors duration-300"
+              target={isExternal(link.url) ? '_blank' : undefined}
+              rel={isExternal(link.url) ? 'noopener noreferrer' : undefined}
+            >
+              {link.label}
+            </a>
+          ))}
+        </nav>
+      </div>
+
+      <!-- Contact -->
+      <div>
+        <h3 class="text-xs font-medium tracking-wider uppercase text-accent-blue mb-6">Contact</h3>
+        <div class="flex flex-col gap-3 text-lg">
+          {contact.contactEmail && (
+            <a href={`mailto:${contact.contactEmail}`} class="hover:text-accent transition-colors duration-300">
+              {contact.contactEmail}
+            </a>
+          )}
+          {contact.contactWhatsappUrl && (
+            <a href={contact.contactWhatsappUrl} class="hover:text-accent transition-colors duration-300" target="_blank" rel="noopener noreferrer">
+              WhatsApp
+            </a>
+          )}
+          {contact.contactPhone && (
+            <a href={`tel:${contact.contactPhone.replace(/\s+/g, '')}`} class="hover:text-accent transition-colors duration-300">
+              {contact.contactPhone}
+            </a>
+          )}
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom Bar -->
+    <div class="flex flex-col md:flex-row items-center justify-between gap-4 pt-8 border-t border-border">
+      <p class="text-sm text-muted-foreground">
+        {footer.footerCopyright || `© ${currentYear} ${settings.title}. All rights reserved.`}
+      </p>
+      <nav class="flex gap-4 text-sm text-muted-foreground">
+        <a href="/privacy-policy/" class="hover:text-accent transition-colors duration-300">Privacy</a>
+        <a href="/terms-and-conditions/" class="hover:text-accent transition-colors duration-300">Terms</a>
+        <a href="/cookie-policy/" class="hover:text-accent transition-colors duration-300">Cookies</a>
+      </nav>
+      <p class="text-sm text-muted-foreground font-medium tracking-wider">
+        {footer.footerTagLine || 'CREATE. CONNECT. ECHO.'}
+      </p>
+    </div>
+  </div>
+</footer>

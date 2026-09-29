@@ -1,0 +1,67 @@
+---
+interface Props {
+  title: string;
+  content: string;
+  modified?: string;
+}
+
+const { title, content, modified } = Astro.props;
+
+const words = title.trim().split(/\s+/);
+const lastWord = words.pop() || '';
+const firstLine = words.join(' ');
+
+const updated = modified
+  ? new Date(modified).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+  : '';
+---
+
+<h1 class="text-4xl md:text-6xl font-bold mb-8" data-text-reveal>
+  <span class="reveal-line block">{firstLine || lastWord}</span>
+  {firstLine && <span class="reveal-line block text-accent">{lastWord}.</span>}
+</h1>
+{updated && <p class="text-muted-foreground mb-8" data-reveal="up">Last updated: {updated}</p>}
+
+<div class="legal-content space-y-10 text-muted-foreground leading-relaxed" data-reveal="up" data-delay="0.1" set:html={content} />
+
+<style is:global>
+  .legal-content h2 {
+    font-size: 1.5rem;
+    line-height: 1.25;
+    font-weight: 700;
+    color: var(--color-text, #f5f5f5);
+    margin-bottom: 1rem;
+  }
+  .legal-content h3 {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: var(--color-text, #f5f5f5);
+    margin-top: 1.75rem;
+    margin-bottom: 0.5rem;
+  }
+  .legal-content p {
+    margin-bottom: 1rem;
+  }
+  .legal-content ul,
+  .legal-content ol {
+    list-style-position: outside;
+    padding-left: 1.5rem;
+    margin-bottom: 1rem;
+  }
+  .legal-content ul {
+    list-style-type: disc;
+  }
+  .legal-content ol {
+    list-style-type: decimal;
+  }
+  .legal-content li {
+    margin-bottom: 0.5rem;
+  }
+  .legal-content a {
+    color: var(--color-accent, #e8b931);
+    text-decoration: underline;
+  }
+  .legal-content strong {
+    color: var(--color-text, #f5f5f5);
+  }
+</style>

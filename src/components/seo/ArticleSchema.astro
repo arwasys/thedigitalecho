@@ -1,0 +1,46 @@
+---
+interface ArticleSchemaProps {
+  title: string;
+  description: string;
+  url: string;
+  image?: string;
+  datePublished: string;
+  dateModified?: string;
+  author?: string;
+}
+
+const {
+  title,
+  description,
+  url,
+  image = 'https://thedigitalecho.com/og-image.jpg',
+  datePublished,
+  dateModified,
+  author = 'The Digital Echo',
+} = Astro.props as ArticleSchemaProps;
+
+const schema = {
+  '@context': 'https://schema.org',
+  '@type': 'Article',
+  headline: title,
+  description,
+  image,
+  url,
+  datePublished,
+  dateModified: dateModified || datePublished,
+  author: {
+    '@type': 'Person',
+    name: author,
+  },
+  publisher: {
+    '@type': 'Organization',
+    name: 'The Digital Echo',
+    logo: {
+      '@type': 'ImageObject',
+      url: 'https://thedigitalecho.com/logo.png',
+    },
+  },
+};
+---
+
+<script type="application/ld+json" set:html={JSON.stringify(schema)} />

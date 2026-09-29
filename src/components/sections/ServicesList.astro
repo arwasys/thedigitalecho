@@ -1,0 +1,132 @@
+---
+import LineartField from '../ui/LineartField.astro';
+import ServiceIcon from '../ui/ServiceIcon.astro';
+import type { Service } from '../../types';
+
+interface Props {
+  services: Service[];
+  title1?: string;
+  title2?: string;
+  allServicesLabel?: string;
+}
+
+const {
+  services,
+  title1 = 'WHAT',
+  title2 = 'WE DO.',
+  allServicesLabel = 'ALL SERVICES →',
+} = Astro.props;
+---
+
+<section class="pt-24 pb-24 border-b border-border relative overflow-hidden">
+  <LineartField />
+  <div class="container relative z-10">
+    <h2 class="text-4xl md:text-6xl lg:text-8xl font-bold tracking-tight leading-none mb-16 brand-statement">
+      <span class="reveal-line block text-accent-blue">{title1}</span>
+      <span class="reveal-line block">{title2}</span>
+    </h2>
+    <div class="services-list">
+      {services.slice(0, 6).map((service) => (
+        <a href={`/services/${service.slug}/`} class="service-item" data-cursor="explore">
+          <div class="service-item__content">
+            <div class="service-item__icon">
+              <ServiceIcon service={service.slug} />
+            </div>
+            <span class="service-item__title">{service.title}</span>
+          </div>
+          <svg class="service-item__arrow" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <line x1="7" y1="17" x2="17" y2="7"></line>
+            <polyline points="7 7 17 7 17 17"></polyline>
+          </svg>
+        </a>
+      ))}
+    </div>
+    <div class="mt-12" data-reveal="up">
+      <a href="/services/" class="btn btn-blue">
+        {allServicesLabel}
+      </a>
+    </div>
+  </div>
+</section>
+
+<style>
+  .services-list {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .service-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 2rem 0;
+    border-top: 1px solid rgba(196, 138, 42, 0.3);
+    text-decoration: none;
+    color: inherit;
+    transition: all 0.3s ease;
+  }
+
+  .service-item:last-child {
+    border-bottom: 1px solid rgba(196, 138, 42, 0.3);
+  }
+
+  .service-item:hover {
+    padding-left: 1rem;
+    background-color: rgba(196, 138, 42, 0.05);
+  }
+
+  .service-item:hover .service-item__title {
+    color: var(--color-accent);
+  }
+
+  .service-item:hover .service-item__arrow {
+    color: var(--color-accent);
+    transform: translate(4px, -4px);
+  }
+
+  .service-item:hover .service-item__icon {
+    color: var(--color-accent);
+  }
+
+  .service-item__content {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+  }
+
+  .service-item__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+    transition: color 0.3s ease;
+  }
+
+  .service-item__icon :global(svg) {
+    width: 100%;
+    height: 100%;
+  }
+
+  .service-item__title {
+    font-size: 2rem;
+    font-weight: 300;
+    transition: color 0.3s ease;
+    letter-spacing: -0.02em;
+    line-height: 1;
+  }
+
+  .service-item__arrow {
+    color: var(--color-muted);
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+    stroke-width: 1;
+  }
+
+  @media (min-width: 768px) {
+    .service-item__title {
+      font-size: 3rem;
+    }
+  }
+</style>

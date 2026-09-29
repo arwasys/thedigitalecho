@@ -1,0 +1,81 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Header from '../../components/layout/Header.astro';
+import Footer from '../../components/layout/Footer.astro';
+import InnerHero from '../../components/ui/InnerHero.astro';
+import LineartField from '../../components/ui/LineartField.astro';
+import { getServices, getHeroByPage } from '../../lib/data';
+
+const [services, hero] = await Promise.all([getServices(), getHeroByPage('/services/')]);
+
+const countLabel = services.length ? `${String(services.length).padStart(2, '0')} Services` : '';
+---
+
+<BaseLayout title="Services">
+  <Header />
+  <main id="main-content" data-page="services" transition:name="page">
+    <InnerHero
+      hero={hero}
+      fallback={{
+        smallText: 'Content That Stops the Scroll.',
+        title: 'Everything Your',
+        title1: 'Brand Needs to Be Seen',
+        description:
+          "Explore The Digital Echo's digital marketing services including content production, photography, videography, drone shoots, social media management, creative campaigns and more.",
+      }}
+      marquee={services.map((service) => service.title)}
+      indexLabel="Services · 01"
+      countLabel={countLabel}
+    />
+
+    <section class="py-24 relative overflow-hidden">
+      <LineartField />
+      <div class="container relative z-10">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {services.map((service, index) => (
+            <a
+              href={`/services/${service.slug}/`}
+              class="group block p-8 border border-border hover:border-accent transition-colors duration-300"
+              data-reveal="up"
+              data-delay={index * 0.1}
+            >
+              <span class="mb-4 block h-10 w-10">
+                {service.icon && /^https?:\/\//.test(service.icon) ? (
+                  <img src={service.icon} alt="" class="h-10 w-10 object-contain" loading="lazy" />
+                ) : (
+                  <span class="text-4xl leading-none">{service.icon}</span>
+                )}
+              </span>
+              <h2 class="text-2xl font-bold mb-4 group-hover:text-accent transition-colors duration-300">
+                {service.title}
+              </h2>
+              <p class="text-muted-foreground">{service.shortDescription}</p>
+            </a>
+          ))}
+        </div>
+      </div>
+    </section>
+  </main>
+  <Footer />
+
+  <script>
+    import { initScrollReveal, initTextReveal, cleanupAnimations } from '../../animations/reveal';
+    import { initMagneticButtons } from '../../animations/magnetic';
+
+    let inited = false;
+
+    function init() {
+      if (inited || !document.querySelector('main[data-page="services"]')) return;
+      inited = true;
+
+      cleanupAnimations();
+      initScrollReveal();
+      initTextReveal();
+      initMagneticButtons();
+    }
+
+    document.addEventListener('DOMContentLoaded', init);
+    document.addEventListener('astro:page-load', init);
+    document.addEventListener('astro:before-swap', () => { inited = false; });
+  </script>
+</BaseLayout>

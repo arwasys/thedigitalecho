@@ -1,0 +1,414 @@
+---
+import type { Hero } from '../../types';
+
+interface Props {
+  hero: Hero | null;
+  /** Page copy used when the WP hero record is missing (contents.md sections). */
+  fallback?: {
+    smallText?: string;
+    title?: string;
+    title1?: string;
+    description?: string;
+  };
+  /** Ticker items shown in the strip at the bottom of the hero. */
+  marquee?: string[];
+  /** Small right-aligned index label, e.g. "SERVICES · 01". */
+  indexLabel?: string;
+  /** Chip on the media panel, e.g. "07 SERVICES". */
+  countLabel?: string;
+}
+
+const { hero, fallback = {}, marquee = [], indexLabel = '', countLabel = '' } = Astro.props;
+
+const smallText = (hero?.smallText?.trim() || fallback.smallText || '').trim();
+const titleLines = (hero?.title?.trim() || fallback.title || 'The Digital Echo')
+  .split('\n')
+  .filter(Boolean);
+const title1 = (hero?.title1?.trim() || fallback.title1 || '').trim();
+const rawDescription = (hero?.heroDescription?.trim() || fallback.description || '').trim();
+
+const escapeHtml = (value: string) =>
+  value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+/* WP heroes carry HTML (`<div>` lines); page fallbacks carry plain text. */
+const descriptionHtml = rawDescription
+  ? /<[a-z][\s\S]*>/i.test(rawDescription)
+    ? rawDescription
+    : rawDescription
+        .split(/\n+/)
+        .filter(Boolean)
+        .map((line) => `<div>${escapeHtml(line)}</div>`)
+        .join('')
+  : '';
+
+/* Long headings (projects / blog) drop a step so they never stack past the fold. */
+const titleLength = titleLines.join(' ').length + title1.length;
+const isLongTitle = titleLength > 42;
+
+const hasVideo = Boolean(hero?.videoUrl && hero.videoUrl.trim() !== '');
+const hasButton1 = Boolean(hero?.button1Label && hero.button1PageLink);
+const hasButton2 = Boolean(hero?.button2Label && hero.button2PageLink);
+
+const ticker = marquee.filter((item) => item && item.trim());
+const tickerItems = ticker.length ? [...ticker, ...ticker] : [];
+---
+
+<section class="inner-hero" data-inner-hero>
+  <div class="container inner-hero__grid">
+    <div class="inner-hero__text">
+      <div class="inner-hero__eyebrow">
+        {smallText && (
+          <span class="hero-badge inner-hero__badge" data-reveal="fade">{smallText}</span>
+        )}
+        {indexLabel && (
+          <span class="inner-hero__index" data-reveal="fade" data-delay="0.1">{indexLabel}</span>
+        )}
+      </div>
+
+      <div class="inner-hero__rule" data-reveal="fade" data-delay="0.15" aria-hidden="true"></div>
+
+      <h1 class:list={['inner-hero__title', isLongTitle && 'inner-hero__title--long']} data-text-reveal>
+        {titleLines.map((line) => (
+          <span class="hero-title-line block">{line}</span>
+        ))}
+        {title1 && <span class="hero-title-line block text-accent">{title1}</span>}
+      </h1>
+
+      {descriptionHtml && (
+        <div class="inner-hero__desc" data-reveal="up" data-delay="0.35" set:html={descriptionHtml}></div>
+      )}
+
+      {(hasButton1 || hasButton2) && (
+        <div class="inner-hero__actions" data-reveal="up" data-delay="0.5">
+          {hasButton1 && (
+            <a href={hero!.button1PageLink} class="btn btn-gold" data-magnetic="0.3">
+              {hero!.button1Label} →
+            </a>
+          )}
+          {hasButton2 && (
+            <a href={hero!.button2PageLink} class="btn btn-black" data-magnetic="0.3">
+              {hero!.button2Label} →
+            </a>
+          )}
+        </div>
+      )}
+
+      <div class="inner-hero__scroll" data-reveal="fade" data-delay="0.7" aria-hidden="true">
+        <span>Scroll</span>
+        <span class="inner-hero__scroll-line"></span>
+      </div>
+    </div>
+
+    <div class="inner-hero__media" data-reveal="scale" data-delay="0.35">
+      <div class="inner-hero__frame">
+        {hasVideo ? (
+          <video data-inner-hero-video autoplay muted loop playsinline preload="metadata">
+            <source src={hero!.videoUrl} type="video/mp4" />
+          </video>
+        ) : (
+          <div class="inner-hero__frame-still"></div>
+        )}
+        {countLabel && <span class="inner-hero__chip">{countLabel}</span>}
+      </div>
+    </div>
+  </div>
+
+  {tickerItems.length > 0 && (
+    <div class="inner-hero__marquee" aria-hidden="true">
+      <div class="inner-hero__track">
+        {tickerItems.map((item) => (
+          <span class="inner-hero__item">
+            <span class="inner-hero__star">✦</span>
+            {item}
+          </span>
+        ))}
+      </div>
+    </div>
+  )}
+</section>
+
+<script>
+  function setupHeroVideos() {
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    document.querySelectorAll<HTMLVideoElement>('[data-inner-hero-video]').forEach((v) => {
+      if (reduced) {
+        v.removeAttribute('autoplay');
+        v.pause();
+        return;
+      }
+      const slow = () => {
+        v.playbackRate = 0.5;
+      };
+      v.playbackRate = 0.5;
+      v.addEventListener('loadeddata', slow, { once: true });
+      v.play().catch(() => {});
+    });
+  }
+
+  setupHeroVideos();
+  document.addEventListener('astro:page-load', setupHeroVideos);
+</script>
+
+<style>
+  .inner-hero {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: min(88vh, 980px);
+    overflow: hidden;
+    padding-top: clamp(7.5rem, 15vh, 11rem);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .inner-hero__grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 3rem;
+    align-items: center;
+    padding-bottom: 3.5rem;
+  }
+
+  .inner-hero__eyebrow {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem 1.5rem;
+  }
+
+  .inner-hero__badge {
+    margin-bottom: 0;
+    padding: 0.5rem 1rem;
+    font-size: 0.7rem;
+    letter-spacing: 0.18em;
+  }
+
+  .inner-hero__index {
+    font-size: 0.7rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--color-muted);
+  }
+
+  .inner-hero__rule {
+    height: 1px;
+    margin: 1.5rem 0 2rem;
+    background: linear-gradient(
+      90deg,
+      var(--color-accent) 0%,
+      color-mix(in srgb, var(--color-accent) 35%, transparent) 45%,
+      transparent 100%
+    );
+  }
+
+  .inner-hero__title {
+    font-size: clamp(2.5rem, 5vw, 5rem);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 0.95;
+    margin-bottom: 1.75rem;
+  }
+
+  .inner-hero__title--long {
+    font-size: clamp(2rem, 3.6vw, 3.5rem);
+    line-height: 1;
+  }
+
+  :global(.inner-hero__desc) {
+    max-width: 34rem;
+    margin-bottom: 2.5rem;
+    font-size: clamp(1rem, 1.1vw, 1.125rem);
+    line-height: 1.7;
+    color: color-mix(in srgb, var(--color-text) 74%, transparent);
+  }
+
+  :global(.inner-hero__desc > * + *) {
+    margin-top: 0.85rem;
+  }
+
+  .inner-hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 3rem;
+  }
+
+  .inner-hero__scroll {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.65rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--color-muted);
+  }
+
+  .inner-hero__scroll-line {
+    position: relative;
+    width: 3.5rem;
+    height: 1px;
+    overflow: hidden;
+    background: color-mix(in srgb, var(--color-text) 25%, transparent);
+  }
+
+  .inner-hero__scroll-line::after {
+    content: '';
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 40%;
+    background: var(--color-accent);
+    animation: inner-hero-scan 2.4s ease-in-out infinite;
+  }
+
+  /* Right: framed media panel with an offset gold outline */
+  .inner-hero__media {
+    position: relative;
+    padding: 0 1.1rem 1.1rem 0;
+    display: none;
+  }
+
+  .inner-hero__media::before {
+    content: '';
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    width: calc(100% - 1.1rem);
+    height: calc(100% - 1.1rem);
+    border: 1px solid color-mix(in srgb, var(--color-accent) 70%, transparent);
+  }
+
+  .inner-hero__frame {
+    position: relative;
+    aspect-ratio: 4 / 5;
+    overflow: hidden;
+    border: 1px solid var(--color-border);
+    background-color: #000;
+  }
+
+  .inner-hero__frame::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      to top,
+      rgba(18, 16, 12, 0.6) 0%,
+      rgba(18, 16, 12, 0.05) 55%,
+      rgba(18, 16, 12, 0.25) 100%
+    );
+    pointer-events: none;
+  }
+
+  .inner-hero__frame video,
+  .inner-hero__frame-still {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    opacity: 0.9;
+  }
+
+  .inner-hero__frame-still {
+    background-image: url('/assets/lineart/digitaloffice.webp');
+    background-size: cover;
+    background-position: center;
+    filter: invert(1) sepia(0.3);
+    mix-blend-mode: screen;
+    opacity: 0.35;
+  }
+
+  .inner-hero__chip {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    z-index: 2;
+    padding: 0.55rem 1rem;
+    background-color: var(--color-accent);
+    color: var(--color-bg);
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+  }
+
+  /* Bottom: service ticker */
+  .inner-hero__marquee {
+    margin-top: auto;
+    overflow: hidden;
+    padding: 1.1rem 0;
+    border-top: 1px solid var(--color-border);
+    background-color: color-mix(in srgb, var(--color-bg) 88%, #000);
+  }
+
+  .inner-hero__track {
+    display: flex;
+    width: max-content;
+    animation: inner-hero-marquee 46s linear infinite;
+  }
+
+  .inner-hero__item {
+    display: inline-flex;
+    align-items: center;
+    gap: 1.5rem;
+    padding-right: 1.5rem;
+    font-size: clamp(0.8rem, 1vw, 0.95rem);
+    font-weight: 600;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    color: color-mix(in srgb, var(--color-text) 72%, transparent);
+  }
+
+  .inner-hero__star {
+    color: var(--color-accent);
+    font-size: 0.75em;
+  }
+
+  @keyframes inner-hero-marquee {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-50%);
+    }
+  }
+
+  @keyframes inner-hero-scan {
+    0% {
+      transform: translateX(-100%);
+    }
+    100% {
+      transform: translateX(350%);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .inner-hero__grid {
+      grid-template-columns: 1.12fr 0.88fr;
+      gap: 4rem;
+    }
+
+    .inner-hero__media {
+      display: block;
+    }
+  }
+
+  @media (max-width: 1023.98px) {
+    .inner-hero {
+      min-height: auto;
+      padding-top: clamp(6.5rem, 22vh, 9rem);
+      padding-bottom: 2rem;
+    }
+
+    .inner-hero__scroll {
+      display: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .inner-hero__track,
+    .inner-hero__scroll-line::after {
+      animation: none;
+    }
+  }
+</style>

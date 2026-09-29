@@ -1,0 +1,69 @@
+---
+// LocalBusiness JSON-LD schema — contact/geography sourced from the
+// site-contact ACF group in WP; address/geo/areaServed are omitted unless set.
+import { getSiteSettings, getSiteContact, getServices, getMenus } from '../../lib/data';
+
+const [settings, contact, services, menus] = await Promise.all([
+  getSiteSettings(),
+  getSiteContact(),
+  getServices(),
+  getMenus(),
+]);
+
+const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://thedigitalecho.com';
+
+const name = 'The Digital Echo';
+const description = settings.description || 'Gen Z-led digital marketing and content production company in India';
+const url = siteUrl;
+const telephone = contact.contactPhone.trim();
+const email = contact.contactEmail.trim();
+
+const address = contact.contactAddress.trim()
+  ? { '@type': 'PostalAddress', streetAddress: contact.contactAddress.trim() }
+  : undefined;
+
+const lat = Number(contact.contactGeoLat);
+const lng = Number(contact.contactGeoLng);
+const geo =
+  contact.contactGeoLat && contact.contactGeoLng && !Number.isNaN(lat) && !Number.isNaN(lng)
+    ? { '@type': 'GeoCoordinates', latitude: lat, longitude: lng }
+    : undefined;
+
+const areaServed = contact.contactAreaServed
+  ? contact.contactAreaServed
+      .split(',')
+      .map((area) => area.trim())
+      .filter(Boolean)
+      .map((area) => ({ '@type': 'City', name: area }))
+  : undefined;
+
+const sameAs = menus.footerSocial
+  .map((link) => link.url)
+  .filter((linkUrl) => /^https?:\/\//.test(linkUrl));
+
+const schema: Record<string, unknown> = {
+  '@context': 'https://schema.org',
+  '@type': 'ProfessionalService',
+  name,
+  description,
+  url,
+  priceRange: '₹₹',
+  hasOfferCatalog: {
+    '@type': 'OfferCatalog',
+    name: 'Digital Marketing Services',
+    itemListElement: services.map((service) => ({
+      '@type': 'Offer',
+      itemOffered: { '@type': 'Service', name: service.title },
+    })),
+  },
+};
+
+if (telephone) schema.telephone = telephone;
+if (email) schema.email = email;
+if (address) schema.address = address;
+if (geo) schema.geo = geo;
+if (areaServed && areaServed.length) schema.areaServed = areaServed;
+if (sameAs.length) schema.sameAs = sameAs;
+---
+
+<script type="application/ld+json" set:html={JSON.stringify(schema)} />

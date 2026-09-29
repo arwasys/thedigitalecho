@@ -1,0 +1,78 @@
+---
+import type { Hero } from '../../types';
+
+interface Props {
+  hero: Hero | null;
+  overlayOpacity?: number;
+}
+
+const { hero, overlayOpacity = 0.1 } = Astro.props;
+
+const hasVideo = hero?.videoUrl && hero.videoUrl.trim() !== '';
+const hasButton1 = hero?.button1Label && hero.button1PageLink;
+const hasButton2 = hero?.button2Label && hero.button2PageLink;
+---
+
+<div class="video-bg">
+  {hasVideo ? (
+    <video
+      class="video-bg__video"
+      autoplay
+      muted
+      playsinline
+    >
+      <source src={hero!.videoUrl} type="video/mp4" />
+    </video>
+  ) : (
+    <div class="video-bg__video" style="background: var(--color-bg);"></div>
+  )}
+  <div class="video-bg__overlay" style={`opacity: ${overlayOpacity}`}></div>
+  <div class="video-bg__content">
+    <script>
+      document.querySelectorAll('.video-bg video').forEach((v) => {
+        v.addEventListener('loadeddata', () => { (v as HTMLVideoElement).playbackRate = 0.5; });
+        if ((v as HTMLVideoElement).readyState >= 2) (v as HTMLVideoElement).playbackRate = 0.5;
+      });
+    </script>
+    {hero?.smallText && (
+      <div class="hero-badge inline-block mb-6 px-4 py-2 bg-primary text-primary-foreground text-xs tracking-widest uppercase" data-reveal="fade">
+        {hero.smallText}
+      </div>
+    )}
+    {hero?.title && (
+      <h1 class="text-[clamp(2.5rem,8vw,10rem)] font-bold tracking-tight leading-[0.9] mb-8 text-text" data-text-reveal>
+        {hero.title.split('\n').map((line) => (
+          <span class="hero-title-line block">{line}</span>
+        ))}
+        {hero.title1 && (
+          <span class="hero-title-line block text-accent">{hero.title1}</span>
+        )}
+      </h1>
+    )}
+    {hero?.heroDescription && (
+      <div class="hero-description max-w-3xl mx-auto mb-12" data-reveal="up" data-delay="0.4" set:html={hero.heroDescription}></div>
+    )}
+    {(hasButton1 || hasButton2) && (
+      <div class="flex flex-col sm:flex-row gap-4 justify-center" data-reveal="up" data-delay="0.6">
+        {hasButton1 && (
+          <a
+            href={hero!.button1PageLink}
+            class="hero-btn btn btn-gold"
+            data-magnetic="0.3"
+          >
+            {hero!.button1Label} →
+          </a>
+        )}
+        {hasButton2 && (
+          <a
+            href={hero!.button2PageLink}
+            class="hero-btn btn btn-black"
+            data-magnetic="0.3"
+          >
+            {hero!.button2Label} →
+          </a>
+        )}
+      </div>
+    )}
+  </div>
+</div>

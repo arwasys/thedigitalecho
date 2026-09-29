@@ -1,0 +1,60 @@
+---
+import LineartField from '../ui/LineartField.astro';
+import { Card, CardHeader, CardTitle } from '@/components/ui/card';
+import type { Post } from '../../types';
+
+interface Props {
+  posts: Post[];
+  title1?: string;
+  title2?: string;
+  viewAllLabel?: string;
+}
+
+const {
+  posts,
+  title1 = 'THE',
+  title2 = 'DROP.',
+  viewAllLabel = 'VIEW ALL ARTICLES →',
+} = Astro.props;
+---
+
+<section class="py-24 border-b border-border relative overflow-hidden">
+  <LineartField />
+  <div class="container relative z-10">
+    <div class="flex items-end justify-between mb-16">
+      <h2 class="text-4xl md:text-6xl lg:text-8xl font-bold tracking-tight leading-none" data-text-reveal>
+        <span class="reveal-line block">{title1}</span>
+        <span class="reveal-line block text-accent">{title2}</span>
+      </h2>
+      <a href="/blog/" class="text-sm tracking-wider uppercase hover:text-accent transition-colors duration-300 hidden md:block" data-reveal="fade">
+        {viewAllLabel}
+      </a>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+      {posts.map((post, index) => (
+        <a href={`/blog/${post.slug}/`} data-reveal="up" data-delay={index * 0.1} data-cursor="view" data-cursor-label="READ">
+          <Card className="group overflow-hidden bg-card border-border hover:border-accent transition-all duration-300 cursor-pointer">
+            <div class="aspect-video overflow-hidden">
+              <img
+                src={post.featuredImage?.node?.sourceUrl || 'https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?q=80&w=800&h=450&auto=format&fit=crop'}
+                alt={post.title}
+                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                loading="lazy"
+                transition:name={`blog-image-${post.slug}`}
+                transition:animate="fade"
+              />
+            </div>
+            <CardHeader>
+              <div class="flex gap-2">
+                {post.categories?.slice(0, 2).map((cat) => (
+                  <span class="text-xs text-accent-blue tracking-wider">{cat.name}</span>
+                ))}
+              </div>
+              <CardTitle className="text-xl font-bold group-hover:text-accent transition-colors duration-300">{post.title}</CardTitle>
+            </CardHeader>
+          </Card>
+        </a>
+      ))}
+    </div>
+  </div>
+</section>
