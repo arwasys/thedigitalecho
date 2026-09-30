@@ -5,32 +5,60 @@ import { initLineart } from './lineart';
 gsap.registerPlugin(ScrollTrigger);
 
 export function initScrollReveal() {
+  const revealAll = () =>
+    document.querySelectorAll<HTMLElement>('[data-reveal]').forEach((el) => {
+      gsap.killTweensOf(el);
+      el.style.opacity = '1';
+      el.style.transform = 'none';
+    });
+
   const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   if (prefersReducedMotion) {
     // Keep CSS-hidden elements (e.g. .hero-badge) visible when animations are disabled
-    document.querySelectorAll<HTMLElement>('[data-reveal]').forEach((el) => { el.style.opacity = '1'; });
+    revealAll();
     return;
   }
 
-  document.querySelectorAll<HTMLElement>('[data-reveal]').forEach((el) => {
-    if (el.closest('section[data-lineart-section]')) return;
+  try {
+    document.querySelectorAll<HTMLElement>('[data-reveal]').forEach((el) => {
+      if (el.closest('section[data-lineart-section]')) return;
 
-    const dir = el.dataset.reveal || 'up';
-    const delay = parseFloat(el.dataset.delay || '0');
-    const from: gsap.TweenVars = { opacity: 0, duration: 0.8, ease: 'power3.out', delay };
-    if (dir === 'up') from.y = 40;
-    else if (dir === 'down') from.y = -40;
-    else if (dir === 'left') from.x = 40;
-    else if (dir === 'right') from.x = -40;
-    else if (dir === 'scale') from.scale = 0.95;
+      const dir = el.dataset.reveal || 'up';
+      const delay = parseFloat(el.dataset.delay || '0');
+      const from: gsap.TweenVars = { opacity: 0, duration: 0.8, ease: 'power3.out', delay };
+      if (dir === 'up') from.y = 40;
+      else if (dir === 'down') from.y = -40;
+      else if (dir === 'left') from.x = 40;
+      else if (dir === 'right') from.x = -40;
+      else if (dir === 'scale') from.scale = 0.95;
 
-    gsap.fromTo(el, from, {
-      opacity: 1, x: 0, y: 0, scale: 1,
-      scrollTrigger: { trigger: el, start: 'top 92%', toggleActions: 'play none none none' },
+      gsap.fromTo(el, from, {
+        opacity: 1, x: 0, y: 0, scale: 1,
+        scrollTrigger: { trigger: el, start: 'top 92%', toggleActions: 'play none none none' },
+      });
     });
-  });
 
-  initLineart();
+    initLineart();
+  } catch (e) {
+    // Never leave content invisible because an animation failed to initialise.
+    console.error('Scroll reveal init failed:', e);
+    revealAll();
+    return;
+  }
+
+  // Trigger positions are measured once — late layout (images, fonts, video) can
+  // shift them so nothing fires and the section stays at opacity 0.
+  requestAnimationFrame(() => ScrollTrigger.refresh());
+  window.addEventListener('load', () => ScrollTrigger.refresh(), { once: true });
+  window.setTimeout(() => {
+    document.querySelectorAll<HTMLElement>('[data-reveal]').forEach((el) => {
+      if (el.style.opacity !== '0') return;
+      if (el.getBoundingClientRect().top >= window.innerHeight) return;
+      gsap.killTweensOf(el);
+      el.style.opacity = '1';
+      el.style.transform = 'none';
+    });
+  }, 2500);
 }
 
 export function initTextReveal() {

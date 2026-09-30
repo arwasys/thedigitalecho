@@ -15,6 +15,7 @@ import {
   GET_WHY_CHOOSE_US,
 } from '../graphql/queries/pages';
 import { GET_CONTACT_FORM, GET_OFFICES } from '../graphql/queries/contact';
+import { GET_PRICING_PLANS } from '../graphql/queries/pricing';
 import { GET_SITE_SETTINGS } from '../graphql/queries/settings';
 import { GET_ALL_HEROS } from '../graphql/queries/heroes';
 import { GET_BRAND_STATEMENTS } from '../graphql/queries/brandStatement';
@@ -44,6 +45,7 @@ import type {
   Cf7Field,
   Page,
   Office,
+  PricingPlan,
 } from '../types';
 import { mockServices } from './mock-data/services';
 import { mockProjects } from './mock-data/projects';
@@ -660,11 +662,16 @@ interface SiteData {
 const DEFAULT_CONTACT: SiteContact = {
   contactEmail: '',
   contactWhatsappUrl: '',
+  contactWhatsappNumber: '',
   contactPhone: '',
   contactAddress: '',
   contactGeoLat: '',
   contactGeoLng: '',
   contactAreaServed: '',
+  contactSocialInstagram: '',
+  contactSocialFacebook: '',
+  contactSocialLinkedin: '',
+  contactSocialYoutube: '',
 };
 
 const DEFAULT_SITE_TEXT: SiteText = {
@@ -806,6 +813,52 @@ export async function getOffices(): Promise<Office[]> {
       );
   } catch (e) {
     console.error('Failed to fetch offices:', e);
+    return [];
+  }
+}
+
+/**
+ * Pricing page plans (`plan` CPT → `planInfo` ACF group), ordered by the
+ * Order field. Drafts are never returned (published plans only).
+ */
+export async function getPricingPlans(): Promise<PricingPlan[]> {
+  if (USE_MOCK_DATA) return [];
+  try {
+    const data = await graphqlClient.query<{
+      plans?: { nodes?: Array<Record<string, unknown> | null> | null } | null;
+    }>(GET_PRICING_PLANS);
+    const nodes = data.plans?.nodes || [];
+
+    const str = (v: unknown): string => (Array.isArray(v) ? String(v[0] ?? '') : String(v ?? ''));
+    const toLines = (v: unknown): string[] =>
+      str(v)
+        .replace(/<br\s*\/?>/gi, '\n')
+        .replace(/<[^>]+>/g, '')
+        .split(/\r?\n/)
+        .map((line) => line.replace(/^[-•*]\s*/, '').trim())
+        .filter(Boolean);
+
+    return nodes
+      .filter((n): n is Record<string, unknown> => Boolean(n))
+      .map((n): PricingPlan => {
+        const info = (n.planInfo || {}) as Record<string, unknown>;
+        const ctaUrl = str(info.planCtaUrl).trim();
+        return {
+          id: str(n.id),
+          title: str(n.title).trim(),
+          price: str(info.planPrice).trim(),
+          period: str(info.planPeriod).trim(),
+          summary: toLines(info.planSummary).join('\n'),
+          features: toLines(info.planFeatures),
+          badge: str(info.planBadge).trim(),
+          highlighted: info.planHighlight === true || info.planHighlight === 1,
+          ctaLabel: str(info.planCtaLabel).trim(),
+          ctaUrl: withTrailingSlash(ctaUrl) || '/contact/',
+        };
+      })
+      .filter((plan) => Boolean(plan.title));
+  } catch (e) {
+    console.error('Failed to fetch pricing plans:', e);
     return [];
   }
 }

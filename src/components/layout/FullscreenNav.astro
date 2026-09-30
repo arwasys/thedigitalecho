@@ -1,5 +1,6 @@
 ---
 import { getMenus, getServices, getHeroes, getSiteContact, getSiteSettings, htmlToText } from '../../lib/data';
+import { getContactLinks } from '../../lib/contact-links';
 
 const [menus, contact, settings, services, heroes] = await Promise.all([
   getMenus(),
@@ -32,14 +33,8 @@ const baseItems = menus.primary.length
 const hasContactItem = baseItems.some((item) => normPath(item.href) === '/contact');
 const items = hasContactItem ? baseItems : [...baseItems, { label: "LET'S TALK", href: '/contact/' }];
 
-const socialItems = menus.footerSocial.length
-  ? menus.footerSocial
-  : [
-      { label: 'Instagram', url: 'https://instagram.com/thedigitalecho' },
-      { label: 'LinkedIn', url: 'https://linkedin.com/company/thedigitalecho' },
-      { label: 'Facebook', url: 'https://facebook.com/thedigitalecho' },
-      { label: 'YouTube', url: 'https://youtube.com/@thedigitalecho' },
-    ];
+// Same links as the footer Contact column (ACF `siteContact`).
+const contactLinks = getContactLinks(contact);
 
 // Hover panels — one per menu link, keyed by normalized path.
 type PanelHeading = { text: string; accent?: boolean };
@@ -191,46 +186,45 @@ if (serviceItems.length) {
     </div>
   </div>
 
-  <!-- Bottom row: Get in touch (left) / Follow us (right) -->
+  <!-- Bottom row: Get in touch — same links as the footer Contact column -->
   <div class="fullscreen-nav__footer">
-    {(contact.contactEmail || contact.contactWhatsappUrl) && (
+    {(contactLinks.email || contactLinks.whatsappHref || contactLinks.phone || contactLinks.socials.length > 0) && (
       <div class="fullscreen-nav__foot-block">
         <p class="fullscreen-nav__contact-label">GET IN TOUCH</p>
         <div class="fullscreen-nav__foot-links">
-          {contact.contactEmail && (
-            <a href={`mailto:${contact.contactEmail}`} class="fullscreen-nav__contact-value">
-              {contact.contactEmail}
+          {contactLinks.email && (
+            <a href={`mailto:${contactLinks.email}`} class="fullscreen-nav__contact-value">
+              {contactLinks.email}
             </a>
           )}
-          {contact.contactWhatsappUrl && (
+          {contactLinks.whatsappHref && (
             <a
-              href={contact.contactWhatsappUrl}
+              href={contactLinks.whatsappHref}
               class="fullscreen-nav__contact-value"
               target="_blank"
               rel="noopener noreferrer"
             >
-              WhatsApp
+              {contactLinks.whatsappLabel}
             </a>
           )}
+          {contactLinks.phone && (
+            <a href={`tel:${contactLinks.phone.replace(/\s+/g, '')}`} class="fullscreen-nav__contact-value">
+              {contactLinks.phone}
+            </a>
+          )}
+          {contactLinks.socials.map((social) => (
+            <a
+              href={social.url}
+              class="fullscreen-nav__contact-value"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {social.label}
+            </a>
+          ))}
         </div>
       </div>
     )}
-
-    <div class="fullscreen-nav__foot-block fullscreen-nav__foot-block--right">
-      <p class="fullscreen-nav__contact-label">FOLLOW US</p>
-      <div class="fullscreen-nav__foot-links">
-        {socialItems.map((item) => (
-          <a
-            href={item.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            class="fullscreen-nav__contact-value"
-          >
-            {item.label}
-          </a>
-        ))}
-      </div>
-    </div>
   </div>
 </div>
 

@@ -16,7 +16,7 @@
 
 ## 📍 PROGRESS TRACKER — FINAL (all phases complete, live-verified 26 Sep 2026)
 
-**Status: Phases 1–9 DONE. Backend verified against live GraphQL; frontend fully dynamic (all user-visible copy from WP) and built (24 pages, 0 errors). Post-build additions (29 Sep): Contact-page offices + enquiry capture (§4.1).**
+**Status: Phases 1–9 DONE. Backend verified against live GraphQL; frontend fully dynamic (all user-visible copy from WP) and built (25 pages, 0 errors). Post-build additions (29 Sep): Contact-page offices + enquiry capture (§4.1), inner-page hero redesign (`InnerHero` on services/service-detail/about/contact/projects/blog, home keeps `PageHero`), Pricing page (§4.2) + nav changes.**
 
 | Phase | Status | Evidence |
 |---|---|---|
@@ -30,6 +30,8 @@
 | 8 Frontend | ✅ | fragments/queries rewritten to live schema; menus+siteFooter+faqs+testimonials+seo wired; CF7 POST; Process §9 + Industries §10 sections; `npx astro check` 0 errors, eslint 0 warnings, `npm run build` 24 pages |
 | 9 Full dynamization | ✅ | every user-visible copy block now comes from WP: contact form (CF7-rendered), About, legal ×3, service content/showcase/CTA, homepage section copy (ACF `homeSections`), section chrome titles (ACF `siteText`), contact details (`siteContact`), page CTAs (`pageCta`), Why-Choose-Us, SEO schemas. Verified: check 0/0, eslint 0, build 24 pages, 12 routes 200, e2e form submit → success panel |
 | 10 Enquiry capture (29 Sep) | ✅ | CF7-158 submissions → CPT **`tde_enquiry`** (mu-plugin `tde-enquiries.php`) with status workflow (New/Read/Replied/Closed), admin listing + columns + filter views + row/bulk actions + metabox, **Export CSV**; notification mail → **hey@thedigitalecho.in**. Verified: REST POST → record + Mailpit mail + Playwright admin walkthrough (see §4.1) |
+| 11 Pricing page + nav (29 Sep) | ✅ | CPT **`plan`** + ACF group `planInfo` (8 fields, `scripts/wp-pricing-setup.php`) → `/pricing/` (25th page); primary menu: **"The Feed" removed**, **Pricing added before The Crew** (`wp menu item add-custom`, position 4); nav index labels renumbered. Verified: `plans{}` resolves, check 0/0, eslint 0, build 25 pages, Playwright (empty state + 3 temporary plan cards, then deleted) — see §4.2 |
+| 12 Footer contact ACF (29 Sep) | ✅ | `siteContact` gained **WhatsApp Number** + **Instagram/Facebook/LinkedIn/YouTube URL** (5 fields, `scripts/wp-footer-contact-setup.php`, idempotent) → footer **Contact** column **and** the fullscreen-menu **GET IN TOUCH** block render the same email/WhatsApp/phone/social links (shared `getContactLinks()`; menu FOLLOW US block dropped as a duplicate); empty fields hide; **footer Navigate column now mirrors the primary menu** (Echo Home · What We Do · Our Work · Pricing · The Crew · Let's Talk). Verified: GraphQL `SiteContact` exposes all 12 fields, footer DOM shows email/WhatsApp/4 socials, check 0/0, eslint 0, build 25 pages |
 
 ### Corrections to the plan below (schema wins — recorded during Phase 8)
 1. Root is **`services`** (never `allService`); `services(where:{orderby:{field:MENU_ORDER,order:ASC}})` works.
@@ -255,6 +257,23 @@ Every CF7-158 submission is stored in a custom post type **`tde_enquiry`**, and 
 
 ---
 
+### 4.2 Pricing page — `plan` CPT + ACF `planInfo` ✅ **DONE (29 Sep)** (user request)
+
+`/pricing/` (Astro `src/pages/pricing.astro`) renders **only** what is in WP — no plan copy lives in the codebase.
+
+- **CPT `plan`** ("Pricing Plans", title = plan name, `page-attributes` → **Order** field = display order) + ACF group **`planInfo`**, both created by `scripts/wp-pricing-setup.php` (idempotent, no seed data).
+- **Fields**: `planPrice` (empty ⇒ card renders **"Custom"**), `planPeriod` (`/ month`), `planSummary`, `planFeatures` (**one feature per line** — free ACF has no Repeater, so it is a textarea split in `getPricingPlans()`), `planBadge` (pill), `planHighlight` (true/false ⇒ gold border + gold price + `btn-gold`), `planCtaLabel`, `planCtaUrl` (empty ⇒ `/contact/`).
+- **GraphQL**: `plans(first:50, where:{orderby:{field:MENU_ORDER,order:ASC}}){ nodes{ title planInfo{ … } } }` — drafts never reach the frontend.
+- **Page**: `InnerHero` (no `/pricing/` hero record yet → in-page fallback: badge "Plans", H1 "Pricing", **static description line** "Three monthly plans — TDE Starter…", index `Pricing · 03`, chip `NN Plans`, marquee = plan names) + plan card grid (`md:2 / lg:3` cols) or, when 0 plans, a contents.md **§15** block ("Your Next Big Idea Starts Here." / "Start A Conversation →"). The animated **Scroll** cue is switched off here (`showScroll={false}`) — it read as a loading indicator under the heading.
+- **Nav**: primary menu item "Pricing" → `/pricing/` inserted **before The Crew** (custom link, position 4); hero index labels renumbered (Our Work 02 · Pricing 03 · The Crew 04 · The Drop 05 · Let's Talk 06); `/pricing/` added to `sitemap.xml.ts`.
+- Also removed per request: **"The Feed"** item (was position 3 → `/services/social-media-management/`) — social media management stays reachable under Services.
+
+✅ **Verified (29 Sep)**: `plans{}` root + all 8 `planInfo` fields resolve; check 0/0, eslint 0, build **25 pages**; Playwright 1440/768/390 → empty state, then with 3 temporary plans → cards (highlighted middle card = `rgb(196,138,42)` border/price, badge, 3/5/2 features, "Custom" fallback, `overflowX: 0`, no JS errors); nav shows `04Pricing` before `05The Crew` on every page. Test plans (282–284) deleted after QA.
+
+✅ **Live content (29 Sep)**: the 3 real plans from `mds/pricing.md` are published — **IDs 285 TDE STARTER (₹14,999/-, 7 features) · 286 TDE GROWTH (₹19,999/-, 7) · 287 TDE PREMIUM (₹24,999/-, 8)**, order 1–3, period `Month*`, no badge/highlight (none specified in the spec → all cards neutral, CTA defaults to "Let's Talk" → `/contact/`). First summary line renders as the **gold tagline**, the rest as the "Best for…" paragraph (`pricing.astro` splits on the first newline). Verified 1440 + 390: titles/taglines/prices/features exact, buttons bottom-aligned, `overflowX: 0`, no JS errors, cards reveal on scroll.
+
+---
+
 # PHASE 5 — SEO ✅ **DONE (26 Sep) — SEOPress (not Yoast, per user decision)**
 
 - [x] Install **SEOPress** (free) — Yoast intentionally skipped (locked decision)
@@ -345,7 +364,7 @@ https://media.w3.org/2010/05/video/movie_300.mp4
 - [x] ACF groups imported (all `acf_import_field_group()`, values seeded, script idempotent):
   | Group key | Location | GraphQL field | Purpose |
   |---|---|---|---|
-  | `group_tde_sitecontact` | Page `site-settings` (157) | `siteContact` | email / whatsapp url / phone / address / geo lat+lng / areaServed |
+  | `group_tde_sitecontact` | Page `site-settings` (157) | `siteContact` | email / whatsapp url / **whatsapp number** / phone / address / geo lat+lng / areaServed / **social: Instagram+Facebook+LinkedIn+YouTube URL** (5 fields added 29 Sep by `scripts/wp-footer-contact-setup.php`) |
   | `group_tde_homesections` | Page `/` (9) | `homeSections` | 24 fields: CP title+4 images, SM titles+platforms, drone eyebrow/titles/body/button, CTA titles/body/buttons |
   | `group_tde_pagecta` | Page/Service/Project/Post | `pageCta` | per-page CTA title1/title2/buttonText/buttonUrl |
   | `group_tde_servicegallery` | Service | `serviceGallery` | `galleryUrl1..4` (URL fields, free-ACF safe) |
@@ -361,7 +380,7 @@ https://media.w3.org/2010/05/video/movie_300.mp4
 - [x] **Service detail**: intro/sections ← `parseContentSections(service.content)` (h3-headed lists → cards; arrow-line `Idea → Concept → …` extracted to process chips); Why-Choose-Us block ← `pageBy('/why-choose-us/')`; global FAQs; showcase ← `featuredImage` + `serviceGallery`; CTA ← `pageCta`; fallbacks preserved
 - [x] **Homepage sections**: `ContentProduction`/`SocialMedia`/`DroneSection`/`CTASection` props ← `getHomeSections()` (titles, images, platforms list, body, button labels/urls); CTA WhatsApp button ← `siteContact.contactWhatsappUrl`
 - [x] **Section chrome**: `ServicesList`/`HorizontalProjects`/`BlogPreview`/`Testimonials`/`FAQSection`/`ProcessSection`/`IndustriesSection` heading titles + "view all" labels ← `getSiteText()` (component defaults = previous hardcoded copy)
-- [x] **Contact spots**: `Footer` + `FullscreenNav` email/WhatsApp/phone ← `getSiteContact()` (conditional rendering when unset)
+- [x] **Contact spots**: `Footer` + `FullscreenNav` email/WhatsApp/phone ← `getSiteContact()` (conditional rendering when unset). **Footer Contact column** and the **fullscreen menu's GET IN TOUCH block** now render the *same* links — one shared helper `src/lib/contact-links.ts` (`getContactLinks()`): email, WhatsApp (label = `contactWhatsappNumber` when set, else "WhatsApp"; href = `contactWhatsappUrl` or `https://wa.me/<digits>`), phone, and the social row ← `contactSocialInstagram/Facebook/Linkedin/Youtube` (empty fields hidden). The menu's separate FOLLOW US block was removed (duplicate of those socials). **Footer Navigate column ← primary menu** (same 6 links as header/fullscreen nav; `footerExplore` menu kept as fallback only).
 - [x] **SEO schemas**: `LocalBusinessSchema` self-fetches (address/geo/areaServed **omitted unless set** — invented Mumbai/geo/phone removed; catalog ← live `getServices()`; `sameAs` ← footer-social menu); `OrganizationSchema`/`WebSiteSchema` ← settings + social menu (fake `SearchAction` removed)
 - [x] Data layer: `parseContentSections()`/`parseContentItem()`/`parseCf7Form()` exported; getters added (`getContactForm/getAboutPage content getPageContent/getHomeSections/getSiteContact/getSiteText/getWhyChooseUs/getSiteData`); `normalizeService` rewritten (sections/process/featuredImage/gallery/pageCta); `DEFAULT_TESTIMONIALS` **removed**; `Page`/`Service`/`Post`/`Project` types extended (`ContentSection`, `PageCta`, `Cf7Form`, …)
 - [x] Verify: `npx astro check` 0 errors/0 warnings · eslint 0 warnings · `npm run build` 24 pages · all routes 200 · DOM marker checks (11 home h2s, CF7 fields, WP headings) · Playwright e2e → **success panel** · screenshots `tde-shots/d-*.png`
@@ -383,7 +402,7 @@ https://media.w3.org/2010/05/video/movie_300.mp4
 
 # siteFooter resolves on PAGE (site-settings, id 157) — field is footerTagLine (capital L)
 { pageBy(uri:"/site-settings/"){ title siteFooter{ footerTagLine footerBlurb footerCta footerCopyright }
-  siteContact{ contactEmail contactWhatsappUrl contactPhone contactAddress contactGeoLat contactGeoLng contactAreaServed }
+  siteContact{ contactEmail contactWhatsappUrl contactWhatsappNumber contactPhone contactAddress contactGeoLat contactGeoLng contactAreaServed contactSocialInstagram contactSocialFacebook contactSocialLinkedin contactSocialYoutube }
   siteText{ titleServices1 titleServices2 titleFaq btnAllServices … } } }
 
 # Homepage section copy (Page /, id 9) — 24 fields
@@ -395,6 +414,10 @@ https://media.w3.org/2010/05/video/movie_300.mp4
 # Offices — Contact page left column (ACF Post Type `office` + group `group_tde_officeinfo`, created 29 Sep by scripts/wp-offices-setup.php)
 # Fields: companyType (select: Head Office/Branch Office/Franchise), companyName, address (textarea, `br` new lines), phone1, phone2, email, mapEmbedUrl
 { offices(first:20, where:{orderby:{field:MENU_ORDER,order:ASC}}){ nodes{ title officeInfo{ companyType companyName address phone1 phone2 email mapEmbedUrl } } } }
+
+# Pricing plans — Pricing page (ACF Post Type `plan` + group `group_tde_planinfo`, created 29 Sep by scripts/wp-pricing-setup.php)
+# Fields: planPrice, planPeriod, planSummary, planFeatures (textarea, one per line), planBadge, planHighlight (bool), planCtaLabel, planCtaUrl
+{ plans(first:50, where:{orderby:{field:MENU_ORDER,order:ASC}}){ nodes{ title menuOrder planInfo{ planPrice planPeriod planSummary planFeatures planBadge planHighlight planCtaLabel planCtaUrl } } } }
 
 # Enquiries — CPT `tde_enquiry` (29 Sep): admin-only, deliberately NOT in GraphQL (show_in_rest/show_in_graphql off).
 # Written by the CF7 158 hook in mu-plugins/tde-enquiries.php; read/export via wp-admin › Enquiries (see §4.1).
@@ -421,7 +444,8 @@ https://media.w3.org/2010/05/video/movie_300.mp4
 
 ## Known gotchas
 - WPGraphQL **cannot filter by ACF group fields** → fetch all + filter client-side (same as heroes; `projectInfo.featured` has no where-arg).
-- `getHeroByPage()` matches `selectPage` **exactly incl. trailing slash**: `/`, `/about/`, `/contact/`, `/services/`, `/projects/`, `/blog/`.
+- `getHeroByPage()` matches `selectPage` **exactly incl. trailing slash**: `/`, `/about/`, `/contact/`, `/services/`, `/projects/`, `/blog/`. **`/pricing/` has no hero record yet** → returns `null` and `pricing.astro` renders its own `InnerHero` `fallback` (badge "Plans", H1 "Pricing").
+- Primary-menu items are **custom links, not WP pages** (no `about`/`services` page in WP) → to add a nav entry run `wp menu item add-custom primary "Label" "/route/" --position=N`; deleting is `wp menu item delete <id>`. Labels/order drive both the desktop header and `FullscreenNav` (which builds its hover panels from the same list).
 - ACF group **GraphQL Field Name** decides the nested object name (e.g. `serviceMenuLinks { … }`) — introspect before wiring code. Use **field keys** with `update_field()`, never graphql names.
 - Repeater-like data must be a **CPT** (free) — don't plan repeaters.
 - **Menus need a theme-registered location** to appear in GraphQL — `mu-plugins/tde-setup.php` registers `primary`, `footer_explore`, `footer_platforms`, `footer_social`; query `menus{ nodes{ locations } }` or by slug.
@@ -436,4 +460,4 @@ https://media.w3.org/2010/05/video/movie_300.mp4
 - PHP 8.4: `fputcsv()` **requires the `$escape` argument** — use `fputcsv( $out, $row, ',', '"', '\\' )`, otherwise a deprecation notice is emitted.
 - CF7 `select`/`radio` posted values arrive as **arrays** → flatten with `wpcf7_array_flatten()`; don't call `get_posted_string()` on a field that may be missing (`trim(null)` deprecates on PHP 8.1+).
 - `wpcf7_before_send_mail` is the right capture point (runs only after validation/spam pass, before the mail is sent) — `wpcf7_mail_sent`/`wpcf7_mail_failed` only tell you the mail result and fire too late to read the posted data.
-- No git repo — back up changed files manually; old versions recoverable from opencode DB (`~/.local/share/opencode/opencode.db`).
+- Git repo: initialised 29 Sep and pushed to **https://github.com/arwasys/thedigitalecho.git** (`main`); `.env` is gitignored, WP app-password notes redacted from these docs before the first push.

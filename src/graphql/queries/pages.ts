@@ -128,11 +128,16 @@ export const GET_SITE_DATA = `
       siteContact {
         contactEmail
         contactWhatsappUrl
+        contactWhatsappNumber
         contactPhone
         contactAddress
         contactGeoLat
         contactGeoLng
         contactAreaServed
+        contactSocialInstagram
+        contactSocialFacebook
+        contactSocialLinkedin
+        contactSocialYoutube
       }
       siteText {
         titleServices1

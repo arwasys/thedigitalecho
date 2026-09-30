@@ -1,0 +1,158 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Header from '../components/layout/Header.astro';
+import Footer from '../components/layout/Footer.astro';
+import InnerHero from '../components/ui/InnerHero.astro';
+import LineartField from '../components/ui/LineartField.astro';
+import { getHeroByPage, getPricingPlans } from '../lib/data';
+
+const [hero, plans] = await Promise.all([getHeroByPage('/pricing/'), getPricingPlans()]);
+
+const countLabel = plans.length ? `${String(plans.length).padStart(2, '0')} Plans` : '';
+
+// First summary line = the plan's positioning line (accent label); the rest is the "Best for…" copy.
+const cards = plans.map((plan) => {
+  const lines = plan.summary.split('\n').map((line) => line.trim()).filter(Boolean);
+  const split = lines.length > 1;
+  return {
+    ...plan,
+    tagline: split ? lines[0] : '',
+    body: (split ? lines.slice(1) : lines).join(' '),
+  };
+});
+---
+
+<BaseLayout title="Pricing">
+  <Header />
+  <main id="main-content" data-page="pricing" transition:name="page">
+    <InnerHero
+      hero={hero}
+      fallback={{
+        smallText: 'Plans',
+        title: 'Pricing',
+        description:
+          "Three monthly plans — TDE Starter, TDE Growth and TDE Premium — for consistent content, shoots and steady growth.\nCompare what's included in each plan and its monthly price below.",
+      }}
+      marquee={plans.map((plan) => plan.title)}
+      indexLabel="Pricing · 03"
+      countLabel={countLabel}
+      showScroll={false}
+    />
+
+    <section class="py-24 relative overflow-hidden">
+      <LineartField />
+      <div class="container relative z-10">
+        {
+          plans.length > 0 ? (
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {cards.map((plan, index) => (
+                <article
+                  class:list={[
+                    'relative flex flex-col p-8 border transition-colors duration-300',
+                    plan.highlighted
+                      ? 'border-accent bg-accent/[0.04]'
+                      : 'border-border hover:border-accent/60',
+                  ]}
+                  data-reveal="up"
+                  data-delay={index * 0.1}
+                >
+                  {plan.badge && (
+                    <span class="absolute -top-3 left-8 inline-block bg-accent text-bg px-3 py-1 text-[11px] font-bold uppercase tracking-widest">
+                      {plan.badge}
+                    </span>
+                  )}
+
+                  <h2 class="text-2xl font-bold">{plan.title}</h2>
+
+                  {plan.tagline && (
+                    <p class="mt-3 text-[11px] font-bold uppercase tracking-[0.18em] text-accent">
+                      {plan.tagline}
+                    </p>
+                  )}
+
+                  {plan.body && <p class="mt-3 text-sm leading-relaxed text-muted-foreground">{plan.body}</p>}
+
+                  <div class="mt-6 flex items-end gap-2">
+                    <span
+                      class:list={[
+                        'text-4xl font-bold leading-none',
+                        plan.highlighted && 'text-accent',
+                      ]}
+                    >
+                      {plan.price || 'Custom'}
+                    </span>
+                    {plan.period && (
+                      <span class="pb-1 text-sm text-muted-foreground">{plan.period}</span>
+                    )}
+                  </div>
+
+                  {plan.features.length > 0 && (
+                    <ul class="mt-8 flex-1 space-y-3">
+                      {plan.features.map((feature) => (
+                        <li class="flex items-start gap-3 text-sm">
+                          <span class="mt-0.5 text-accent" aria-hidden="true">
+                            ✓
+                          </span>
+                          <span>{feature}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+
+                  <div class="mt-8">
+                    <a
+                      href={plan.ctaUrl}
+                      class:list={['btn w-full', plan.highlighted ? 'btn-gold' : 'btn-black']}
+                      data-magnetic="0.3"
+                    >
+                      {plan.ctaLabel || "Let's Talk"} →
+                    </a>
+                  </div>
+                </article>
+              ))}
+            </div>
+          ) : (
+            <div class="max-w-2xl mx-auto text-center">
+              <h2 class="mb-6 text-4xl font-bold md:text-5xl" data-text-reveal>
+                <span class="reveal-line block">Your Next Big Idea</span>
+                <span class="reveal-line block text-accent">Starts Here.</span>
+              </h2>
+              <p class="mx-auto mb-8 max-w-xl text-lg text-muted-foreground" data-reveal="up" data-delay="0.2">
+                Have a project in mind? Don't overthink it. Tell us what you're trying to create.
+              </p>
+              <div data-reveal="up" data-delay="0.3">
+                <a href="/contact/" class="btn btn-gold" data-magnetic="0.3">
+                  Start A Conversation →
+                </a>
+              </div>
+            </div>
+          )
+        }
+      </div>
+    </section>
+  </main>
+  <Footer />
+
+  <script>
+    import { initScrollReveal, initTextReveal, cleanupAnimations } from '../animations/reveal';
+    import { initMagneticButtons } from '../animations/magnetic';
+
+    let inited = false;
+
+    function init() {
+      if (inited || !document.querySelector('main[data-page="pricing"]')) return;
+      inited = true;
+
+      cleanupAnimations();
+      initScrollReveal();
+      initTextReveal();
+      initMagneticButtons();
+    }
+
+    document.addEventListener('DOMContentLoaded', init);
+    document.addEventListener('astro:page-load', init);
+    document.addEventListener('astro:before-swap', () => {
+      inited = false;
+    });
+  </script>
+</BaseLayout>

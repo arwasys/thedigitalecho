@@ -112,11 +112,18 @@ export interface SiteFooter {
 export interface SiteContact {
   contactEmail: string;
   contactWhatsappUrl: string;
+  /** Display number for the footer WhatsApp link; empty → the word "WhatsApp". */
+  contactWhatsappNumber: string;
   contactPhone: string;
   contactAddress: string;
   contactGeoLat: string;
   contactGeoLng: string;
   contactAreaServed: string;
+  /** Footer Contact column social profiles (free ACF: one URL field per platform). */
+  contactSocialInstagram: string;
+  contactSocialFacebook: string;
+  contactSocialLinkedin: string;
+  contactSocialYoutube: string;
 }
 
 /** One row of the `officeInfo` ACF group on the `office` CPT (Contact page). */
@@ -131,6 +138,23 @@ export interface Office {
   email: string;
   /** Google Maps embed URL (the iframe `src`) — only rendered when it is http(s). */
   mapUrl: string;
+}
+
+/** One row of the `planInfo` ACF group on the `plan` CPT (Pricing page). */
+export interface PricingPlan {
+  id: string;
+  /** Plan name = the plan post title. */
+  title: string;
+  /** Empty string when no price is entered → the card renders "Custom". */
+  price: string;
+  period: string;
+  summary: string;
+  /** One entry per line from the ACF Features textarea. */
+  features: string[];
+  badge: string;
+  highlighted: boolean;
+  ctaLabel: string;
+  ctaUrl: string;
 }
 
 export interface SiteText {

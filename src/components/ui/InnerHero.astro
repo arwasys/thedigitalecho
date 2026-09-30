@@ -16,9 +16,18 @@ interface Props {
   indexLabel?: string;
   /** Chip on the media panel, e.g. "07 SERVICES". */
   countLabel?: string;
+  /** Hide the animated "Scroll" cue (it reads as a loading indicator on some pages). */
+  showScroll?: boolean;
 }
 
-const { hero, fallback = {}, marquee = [], indexLabel = '', countLabel = '' } = Astro.props;
+const {
+  hero,
+  fallback = {},
+  marquee = [],
+  indexLabel = '',
+  countLabel = '',
+  showScroll = true,
+} = Astro.props;
 
 const smallText = (hero?.smallText?.trim() || fallback.smallText || '').trim();
 const titleLines = (hero?.title?.trim() || fallback.title || 'The Digital Echo')
@@ -93,10 +102,12 @@ const tickerItems = ticker.length ? [...ticker, ...ticker] : [];
         </div>
       )}
 
-      <div class="inner-hero__scroll" data-reveal="fade" data-delay="0.7" aria-hidden="true">
-        <span>Scroll</span>
-        <span class="inner-hero__scroll-line"></span>
-      </div>
+      {showScroll && (
+        <div class="inner-hero__scroll" data-reveal="fade" data-delay="0.7" aria-hidden="true">
+          <span>Scroll</span>
+          <span class="inner-hero__scroll-line"></span>
+        </div>
+      )}
     </div>
 
     <div class="inner-hero__media" data-reveal="scale" data-delay="0.35">

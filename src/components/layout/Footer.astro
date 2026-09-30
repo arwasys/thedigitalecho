@@ -1,5 +1,6 @@
 ---
 import { getSiteSettings, getMenus, getSiteData } from '../../lib/data';
+import { getContactLinks } from '../../lib/contact-links';
 
 const [settings, menus, siteData] = await Promise.all([getSiteSettings(), getMenus(), getSiteData()]);
 const { footer, contact } = siteData;
@@ -22,9 +23,17 @@ const fallbackSocial = [
   { label: 'YouTube', url: 'https://youtube.com/@thedigitalecho' },
 ];
 
-const exploreLinks = menus.footerExplore.length ? menus.footerExplore : fallbackExplore;
+// Navigate column mirrors the primary menu (same links as the header / fullscreen nav).
+const exploreLinks = menus.primary.length
+  ? menus.primary.map((item) => ({ label: item.label, url: item.url }))
+  : menus.footerExplore.length
+    ? menus.footerExplore
+    : fallbackExplore;
 const platformLinks = menus.footerPlatforms;
 const socialLinks = menus.footerSocial.length ? menus.footerSocial : fallbackSocial;
+
+/* Footer Contact column — all values come from the `siteContact` ACF group. */
+const { whatsappHref, whatsappLabel, socials: contactSocials } = getContactLinks(contact);
 
 function isExternal(url: string) {
   return /^https?:\/\//.test(url);
@@ -40,7 +49,7 @@ function isExternal(url: string) {
           <img
             src={settings.logo}
             alt={settings.title}
-            class="h-10 md:h-12 w-auto"
+            class="h-16 md:h-20 w-auto"
           />
         ) : (
           <span class="text-lg font-bold tracking-widest uppercase">
@@ -115,9 +124,9 @@ function isExternal(url: string) {
               {contact.contactEmail}
             </a>
           )}
-          {contact.contactWhatsappUrl && (
-            <a href={contact.contactWhatsappUrl} class="hover:text-accent transition-colors duration-300" target="_blank" rel="noopener noreferrer">
-              WhatsApp
+          {whatsappHref && (
+            <a href={whatsappHref} class="hover:text-accent transition-colors duration-300" target="_blank" rel="noopener noreferrer">
+              {whatsappLabel}
             </a>
           )}
           {contact.contactPhone && (
@@ -126,6 +135,21 @@ function isExternal(url: string) {
             </a>
           )}
         </div>
+
+        {contactSocials.length > 0 && (
+          <div class="mt-5 flex flex-wrap gap-x-5 gap-y-2">
+            {contactSocials.map((social) => (
+              <a
+                href={social.url}
+                class="text-sm tracking-wider uppercase text-muted-foreground hover:text-accent transition-colors duration-300"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {social.label}
+              </a>
+            ))}
+          </div>
+        )}
       </div>
     </div>
 
