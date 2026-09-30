@@ -41,7 +41,7 @@ const wpRestBase = (import.meta.env.WORDPRESS_GRAPHQL_URL || '').replace(
         description:
           "Whether you need a one-day product shoot, a complete social media strategy, drone photography or ongoing digital marketing support, tell us what you're working on.\nWe'll figure out the next move together.",
       }}
-      marquee={services.map((service) => service.title)}
+      marquee={services.map((service) => ({ label: service.title, href: `/services/${service.slug}/` }))}
       indexLabel="Let's Talk · 06"
       countLabel={siteContact.contactEmail || ''}
     />

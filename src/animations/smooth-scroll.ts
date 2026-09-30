@@ -45,3 +45,12 @@ export function stopSmoothScroll() {
 export function startSmoothScroll() {
   lenis?.start();
 }
+
+export function scrollToTop() {
+  if (lenis) {
+    lenis.scrollTo(0, { duration: 1.2 });
+    return;
+  }
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  window.scrollTo({ top: 0, behavior: reduced ? 'auto' : 'smooth' });
+}

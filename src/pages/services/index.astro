@@ -23,7 +23,7 @@ const countLabel = services.length ? `${String(services.length).padStart(2, '0')
         description:
           "Explore The Digital Echo's digital marketing services including content production, photography, videography, drone shoots, social media management, creative campaigns and more.",
       }}
-      marquee={services.map((service) => service.title)}
+      marquee={services.map((service) => ({ label: service.title, href: `/services/${service.slug}/` }))}
       indexLabel="Services · 01"
       countLabel={countLabel}
     />

@@ -10,8 +10,9 @@ interface Props {
     title1?: string;
     description?: string;
   };
-  /** Ticker items shown in the strip at the bottom of the hero. */
-  marquee?: string[];
+  /** Ticker items shown in the strip at the bottom of the hero. Strings render
+   * as plain text; objects render as links. */
+  marquee?: (string | { label: string; href: string })[];
   /** Small right-aligned index label, e.g. "SERVICES · 01". */
   indexLabel?: string;
   /** Chip on the media panel, e.g. "07 SERVICES". */
@@ -58,7 +59,13 @@ const hasVideo = Boolean(hero?.videoUrl && hero.videoUrl.trim() !== '');
 const hasButton1 = Boolean(hero?.button1Label && hero.button1PageLink);
 const hasButton2 = Boolean(hero?.button2Label && hero.button2PageLink);
 
-const ticker = marquee.filter((item) => item && item.trim());
+const ticker = marquee
+  .map((item) =>
+    typeof item === 'string'
+      ? { label: item, href: '' }
+      : { label: item.label || '', href: item.href || '' },
+  )
+  .filter((item) => item.label && item.label.trim());
 const tickerItems = ticker.length ? [...ticker, ...ticker] : [];
 ---
 
@@ -125,12 +132,22 @@ const tickerItems = ticker.length ? [...ticker, ...ticker] : [];
   </div>
 
   {tickerItems.length > 0 && (
-    <div class="inner-hero__marquee" aria-hidden="true">
+    <div class="inner-hero__marquee">
       <div class="inner-hero__track">
-        {tickerItems.map((item) => (
-          <span class="inner-hero__item">
+        {tickerItems.map((item, index) => (
+          <span class="inner-hero__item" aria-hidden={index >= ticker.length ? 'true' : undefined}>
             <span class="inner-hero__star">✦</span>
-            {item}
+            {item.href ? (
+              <a
+                href={item.href}
+                class="inner-hero__link"
+                tabindex={index >= ticker.length ? '-1' : undefined}
+              >
+                {item.label}
+              </a>
+            ) : (
+              item.label
+            )}
           </span>
         ))}
       </div>
@@ -373,6 +390,17 @@ const tickerItems = ticker.length ? [...ticker, ...ticker] : [];
   .inner-hero__star {
     color: var(--color-accent);
     font-size: 0.75em;
+  }
+
+  .inner-hero__link {
+    color: inherit;
+    text-decoration: none;
+    transition: color 0.3s ease;
+  }
+
+  .inner-hero__link:hover,
+  .inner-hero__item:has(.inner-hero__link:hover) {
+    color: var(--color-accent);
   }
 
   @keyframes inner-hero-marquee {

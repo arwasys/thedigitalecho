@@ -1,0 +1,94 @@
+<button class="back-to-top" data-back-to-top type="button" aria-label="Back to top">
+  <svg
+    width="20"
+    height="20"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="1.5"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    aria-hidden="true"
+  >
+    <line x1="12" y1="19" x2="12" y2="5"></line>
+    <polyline points="5 12 12 5 19 12"></polyline>
+  </svg>
+</button>
+
+<script>
+  import { scrollToTop } from '../../animations/smooth-scroll';
+
+  const THRESHOLD = 600;
+
+  function update() {
+    const btn = document.querySelector<HTMLButtonElement>('[data-back-to-top]');
+    if (btn) btn.classList.toggle('is-visible', window.scrollY > THRESHOLD);
+  }
+
+  function setup() {
+    const btn = document.querySelector<HTMLButtonElement>('[data-back-to-top]');
+    if (!btn || btn.dataset.bound) return;
+    btn.dataset.bound = '1';
+    btn.addEventListener('click', () => scrollToTop());
+    update();
+  }
+
+  window.addEventListener('scroll', update, { passive: true });
+  setup();
+  document.addEventListener('astro:page-load', () => {
+    setup();
+    update();
+  });
+</script>
+
+<style>
+  .back-to-top {
+    position: fixed;
+    right: clamp(1rem, 3vw, 2rem);
+    bottom: clamp(1rem, 3vw, 2rem);
+    z-index: 30;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 3rem;
+    height: 3rem;
+    border: 1px solid var(--color-border);
+    background: color-mix(in srgb, var(--color-bg) 88%, #000);
+    color: var(--color-text);
+    cursor: pointer;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(12px);
+    transition:
+      opacity 0.35s ease,
+      transform 0.35s ease,
+      visibility 0.35s ease,
+      color 0.3s ease,
+      border-color 0.3s ease;
+  }
+
+  .back-to-top.is-visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+
+  .back-to-top:hover {
+    color: var(--color-accent);
+    border-color: var(--color-accent);
+  }
+
+  .back-to-top:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .back-to-top {
+      transform: none;
+      transition:
+        opacity 0.2s ease,
+        visibility 0.2s ease;
+    }
+  }
+</style>

@@ -5,6 +5,7 @@ import Footer from '../../components/layout/Footer.astro';
 import type { Hero } from '../../types';
 import InnerHero from '../../components/ui/InnerHero.astro';
 import LineartField from '../../components/ui/LineartField.astro';
+import ServicesNav from '../../components/sections/ServicesNav.astro';
 import ServiceSchema from '../../components/seo/ServiceSchema.astro';
 import FAQSchema from '../../components/seo/FAQSchema.astro';
 import BreadcrumbSchema from '../../components/seo/BreadcrumbSchema.astro';
@@ -73,7 +74,7 @@ const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://thedigitalecho.in';
         title: service.title,
         description: service.heroDescription || service.shortDescription || '',
       }}
-      marquee={allServices.map((item) => item.title)}
+      marquee={allServices.map((item) => ({ label: item.title, href: `/services/${item.slug}/` }))}
       indexLabel={`Services · ${serviceIndex}`}
       countLabel={allServices.length ? `${serviceIndex} / ${serviceTotal}` : ''}
     />
@@ -83,7 +84,7 @@ const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://thedigitalecho.in';
       <LineartField />
       <div class="container relative z-10">
         <div class="max-w-4xl mx-auto">
-          <h2 class="text-3xl md:text-5xl font-bold mb-8" data-reveal="up">About</h2>
+          <h2 class="text-3xl md:text-5xl font-bold mb-8" data-reveal="up">About {service.title}</h2>
           <p class="text-lg text-muted-foreground leading-relaxed" data-reveal="up" data-delay="0.1">{service.description}</p>
         </div>
       </div>
@@ -255,6 +256,9 @@ const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://thedigitalecho.in';
         </div>
       </section>
     )}
+
+    <!-- Service interlinks -->
+    <ServicesNav services={allServices} currentSlug={service.slug} />
 
     <!-- CTA -->
     <section class="py-24 border-t border-border relative overflow-hidden">

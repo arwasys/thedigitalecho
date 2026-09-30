@@ -3,6 +3,7 @@ import '../styles/global.css';
 import { getSiteSettings } from '../lib/data';
 import Cursor from '../components/ui/Cursor.astro';
 import Lightbox from '../components/ui/Lightbox.astro';
+import BackToTop from '../components/ui/BackToTop.astro';
 import Analytics from '../components/seo/Analytics.astro';
 import FullscreenNav from '../components/layout/FullscreenNav.astro';
 import { ClientRouter } from 'astro:transitions';
@@ -83,6 +84,7 @@ const seoTwitterImage = toAbsoluteUrl(seo?.twitterImage || seoOgImage);
     <slot />
     <Cursor />
     <Lightbox />
+    <BackToTop />
     <script>
       import { initCursor } from '../animations/cursor';
       initCursor();
