@@ -7,8 +7,8 @@
   },
   "scripts": {
     "dev": "astro dev",
-    "build": "NODE_OPTIONS=--max-old-space-size=2048 astro build",
-    "start": "node dist/server/entry.mjs",
+    "build": "node --max-old-space-size=3072 ./node_modules/astro/bin/astro.mjs build",
+    "start": "node --max-old-space-size=2048 dist/server/entry.mjs",
     "preview": "astro preview",
     "astro": "astro",
     "lint": "eslint .",
