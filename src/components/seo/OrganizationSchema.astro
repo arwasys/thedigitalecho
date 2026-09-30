@@ -3,7 +3,7 @@ import { getSiteSettings, getMenus } from '../../lib/data';
 
 const [settings, menus] = await Promise.all([getSiteSettings(), getMenus()]);
 
-const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://thedigitalecho.com';
+const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://thedigitalecho.in';
 
 const name = settings.title || 'The Digital Echo';
 const url = siteUrl;

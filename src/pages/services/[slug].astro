@@ -8,18 +8,14 @@ import LineartField from '../../components/ui/LineartField.astro';
 import ServiceSchema from '../../components/seo/ServiceSchema.astro';
 import FAQSchema from '../../components/seo/FAQSchema.astro';
 import BreadcrumbSchema from '../../components/seo/BreadcrumbSchema.astro';
-import { getServiceBySlug, getServiceSlugs, getProjects, getHeroByPage, getWhyChooseUs, getFaqs, getProcessSteps, getServices } from '../../lib/data';
-
-export async function getStaticPaths() {
-  const slugs = await getServiceSlugs();
-  return slugs.map((slug) => ({ params: { slug } }));
-}
+import { getServiceBySlug, getProjects, getHeroByPage, getWhyChooseUs, getFaqs, getProcessSteps, getServices } from '../../lib/data';
 
 const { slug } = Astro.params;
-const service = await getServiceBySlug(slug!);
+const service = slug ? await getServiceBySlug(slug) : null;
 
 if (!service) {
-  return Astro.redirect('/404');
+  const notFound = await Astro.rewrite('/404');
+  return new Response(notFound.body, { status: 404, statusText: 'Not Found', headers: notFound.headers });
 }
 
 const [allProjects, hero, whyChooseUs, faqs, allProcessSteps, allServices] = await Promise.all([
@@ -52,7 +48,7 @@ const detailHero: Hero | null = hero
     }
   : null;
 
-const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://thedigitalecho.com';
+const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://thedigitalecho.in';
 ---
 
 <BaseLayout title={service.title} description={service.seo?.description || service.shortDescription} seo={service.seo}>

@@ -3,18 +3,14 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import Header from '../../components/layout/Header.astro';
 import Footer from '../../components/layout/Footer.astro';
 import LineartField from '../../components/ui/LineartField.astro';
-import { getProjectBySlug, getProjectSlugs } from '../../lib/data';
-
-export async function getStaticPaths() {
-  const slugs = await getProjectSlugs();
-  return slugs.map((slug) => ({ params: { slug } }));
-}
+import { getProjectBySlug } from '../../lib/data';
 
 const { slug } = Astro.params;
-const project = await getProjectBySlug(slug!);
+const project = slug ? await getProjectBySlug(slug) : null;
 
 if (!project) {
-  return Astro.redirect('/404');
+  const notFound = await Astro.rewrite('/404');
+  return new Response(notFound.body, { status: 404, statusText: 'Not Found', headers: notFound.headers });
 }
 ---
 

@@ -2,7 +2,7 @@ import type { APIRoute } from 'astro';
 import { getServices, getProjects, getPosts } from '../lib/data';
 
 export const GET: APIRoute = async () => {
-  const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://thedigitalecho.com';
+  const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://thedigitalecho.in';
 
   const services = await getServices();
   const projects = await getProjects();

@@ -5,21 +5,17 @@ import Footer from '../../components/layout/Footer.astro';
 import LineartField from '../../components/ui/LineartField.astro';
 import ArticleSchema from '../../components/seo/ArticleSchema.astro';
 import BreadcrumbSchema from '../../components/seo/BreadcrumbSchema.astro';
-import { getPostBySlug, getPostSlugs } from '../../lib/data';
-
-export async function getStaticPaths() {
-  const slugs = await getPostSlugs();
-  return slugs.map((slug) => ({ params: { slug } }));
-}
+import { getPostBySlug } from '../../lib/data';
 
 const { slug } = Astro.params;
-const post = await getPostBySlug(slug!);
+const post = slug ? await getPostBySlug(slug) : null;
 
 if (!post) {
-  return Astro.redirect('/404');
+  const notFound = await Astro.rewrite('/404');
+  return new Response(notFound.body, { status: 404, statusText: 'Not Found', headers: notFound.headers });
 }
 
-const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://thedigitalecho.com';
+const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'https://thedigitalecho.in';
 ---
 
 <BaseLayout title={post.title} description={post.excerpt} seo={post.seo}>

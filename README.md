@@ -32,16 +32,29 @@ npm run preview
 
 ## Environment Variables
 
-Create a `.env` file:
+Create a `.env` file (gitignored — never commit it):
 
 ```env
-WORDPRESS_GRAPHQL_URL=http://your-wordpress-site.com/graphql
-PUBLIC_SITE_URL=http://localhost:4321
-PUBLIC_LOGO_URL=
+# WordPress GraphQL endpoint (headless CMS)
+WORDPRESS_GRAPHQL_URL=https://tde.arwasys.in/graphql
+
+# Public frontend origin — feeds canonical/OG/schema/sitemap/robots
+PUBLIC_SITE_URL=https://thedigitalecho.in
+
+# Logo (WordPress Media Library URL)
+PUBLIC_LOGO_URL=https://tde.arwasys.in/wp-content/uploads/…/logo.svg
+
+# Analytics (optional)
 PUBLIC_GA_ID=
 PUBLIC_META_PIXEL_ID=
 PUBLIC_LINKEDIN_PARTNER_ID=
+
+# Fail loudly instead of silently falling back to mock content when the
+# WordPress GraphQL API is unreachable (set in CI + production builds)
+STRICT_FETCH=1
 ```
+
+`PUBLIC_*` values are inlined **at build time** — they must exist before `npm run build`.
 
 ## Project Structure
 
@@ -91,11 +104,36 @@ Required custom post types:
 
 ## Deployment
 
-Compatible with:
-- Vercel
-- Netlify
-- Cloudflare
-- Static hosting
+**Hybrid SSR on cPanel** — `output: 'server'` + `@astrojs/node` (standalone).
+Pages render on demand (always in sync with WordPress); the legal pages opt out
+with `export const prerender = true`.
+
+### Architecture
+
+| Piece | URL |
+|---|---|
+| WordPress (headless API) | `https://tde.arwasys.in/graphql` → `WORDPRESS_GRAPHQL_URL` |
+| Astro frontend | `https://thedigitalecho.in` → `PUBLIC_SITE_URL` |
+
+### One-time cPanel setup
+
+1. **Git Version Control** → clone `https://github.com/arwasys/thedigitalecho.git`
+   (branch `main`) into a directory **outside** `public_html` (e.g. `~/thedigitalecho`).
+2. Create `~/thedigitalecho/.env` (see Environment Variables above).
+3. **Setup Node.js App** → Create: Node **≥22.12** · Production ·
+   application root `thedigitalecho` · URL `https://thedigitalecho.in` ·
+   startup file **`dist/server/entry.mjs`**.
+4. **Run NPM Install** → **Run JS Script** `build` → **Start**.
+5. Point `thedigitalecho.in` (+ `www` → redirect) at the server; run **AutoSSL**.
+
+### Each release
+
+Git Version Control → **Pull** → Setup Node.js App → Run JS Script `build` → **Restart**.
+
+### Fallback (no Node on the host)
+
+Static build: `npm run build` → deploy `dist/client`… to `public_html`, or let
+GitHub Actions build on push. Same SEO (full HTML), content updates need a rebuild.
 
 ## License
 
