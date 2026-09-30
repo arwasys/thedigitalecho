@@ -1,6 +1,6 @@
 import { C as createAstro, f as renderTemplate, h as addAttribute, p as maybeRenderHead, x as unescapeHTML } from "./server_FTIkVOiY.mjs";
 import { t as createComponent } from "./compiler_B7Puqq8M.mjs";
-import { i as renderScript } from "./Footer_DFDe9_Mq.mjs";
+import { i as renderScript } from "./Footer_Bf44ULlV.mjs";
 //#region src/components/ui/InnerHero.astro
 createAstro("https://astro.build");
 var $$InnerHero = createComponent(($$result, $$props, $$slots) => {

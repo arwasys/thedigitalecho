@@ -1,6 +1,6 @@
 import { C as createAstro, a as renderComponent, f as renderTemplate, g as createRenderInstruction, h as addAttribute, l as renderSlot, m as renderHead, n as renderTransition, p as maybeRenderHead } from "./server_FTIkVOiY.mjs";
 import { t as createComponent } from "./compiler_B7Puqq8M.mjs";
-import { E as htmlToText, S as getSiteSettings, b as getSiteContact, l as getMenus, o as getHeroes, x as getSiteData, y as getServices } from "./data_B_P01u1Y.mjs";
+import { E as htmlToText, S as getSiteSettings, b as getSiteContact, l as getMenus, o as getHeroes, x as getSiteData, y as getServices } from "./data_DjV83Vdc.mjs";
 //#region node_modules/astro/dist/runtime/server/render/script.js
 async function renderScript(result, id) {
 	const inlined = result.inlinedScripts.get(id);

@@ -16,34 +16,49 @@ var GraphQLClient = class {
 		const pending = inflight.get(key);
 		if (pending) return pending;
 		const request = (async () => {
-			const controller = new AbortController();
-			const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
-			try {
-				const response = await fetch(this.endpoint, {
-					method: "POST",
-					headers: { "Content-Type": "application/json" },
-					body: JSON.stringify({
-						query,
-						variables
-					}),
-					signal: controller.signal
-				});
-				if (!response.ok) throw new Error(`GraphQL request failed: ${response.statusText}`);
-				const json = await response.json();
-				if (json.errors) throw new Error(json.errors[0].message);
+			let lastError;
+			for (let attempt = 0; attempt < 2; attempt++) {
+				const controller = new AbortController();
+				const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+				try {
+					const response = await fetch(this.endpoint, {
+						method: "POST",
+						headers: { "Content-Type": "application/json" },
+						body: JSON.stringify({
+							query,
+							variables
+						}),
+						signal: controller.signal
+					});
+					if (!response.ok) throw new Error(`GraphQL request failed: ${response.statusText}`);
+					const json = await response.json();
+					if (json.errors) throw new Error(json.errors[0].message);
+					cache.set(key, {
+						value: json.data,
+						expires: Date.now() + CACHE_TTL_MS
+					});
+					return json.data;
+				} catch (error) {
+					lastError = error;
+					if (attempt === 0) await new Promise((resolve) => setTimeout(resolve, 500));
+				} finally {
+					clearTimeout(timer);
+				}
+			}
+			const stale = cache.get(key);
+			if (stale) {
+				console.warn("GraphQL offline — serving stale cache:", String(lastError));
 				cache.set(key, {
-					value: json.data,
+					value: stale.value,
 					expires: Date.now() + CACHE_TTL_MS
 				});
-				return json.data;
-			} catch (error) {
-				console.error("GraphQL Error:", error);
-				throw error;
-			} finally {
-				clearTimeout(timer);
-				inflight.delete(key);
+				return stale.value;
 			}
-		})();
+			console.error("GraphQL Error:", lastError);
+			throw lastError;
+		})().finally(() => {
+			inflight.delete(key);
+		});
 		inflight.set(key, request);
 		return request;
 	}
@@ -1366,7 +1381,8 @@ var mockBrandStatement = {
 //#endregion
 //#region src/lib/data.ts
 function fetchFailed(error, message) {
-	throw error;
+	if ((globalThis.process?.env)?.STRICT_FETCH === "1") throw error;
+	console.error(message, error);
 }
 function toSeo(raw) {
 	return {

@@ -1,5 +1,5 @@
 import { t as __exportAll } from "./rolldown-runtime_D7D4PA-g.mjs";
-import { _ as getProjects, p as getPosts, y as getServices } from "./data_B_P01u1Y.mjs";
+import { _ as getProjects, p as getPosts, y as getServices } from "./data_DjV83Vdc.mjs";
 //#region src/pages/sitemap.xml.ts
 var sitemap_xml_exports = /* @__PURE__ */ __exportAll({ GET: () => GET });
 var GET = async () => {
