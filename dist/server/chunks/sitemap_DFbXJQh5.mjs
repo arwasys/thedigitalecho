@@ -9,7 +9,7 @@ var GET = async () => {
 	const { posts } = await getPosts(100);
 	const staticPages = [
 		{
-			url: siteUrl,
+			url: `${siteUrl}/`,
 			changefreq: "daily",
 			priority: 1
 		},

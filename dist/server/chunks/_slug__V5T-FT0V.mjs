@@ -1,9 +1,9 @@
 import { t as __exportAll } from "./rolldown-runtime_D7D4PA-g.mjs";
 import { C as createAstro, a as renderComponent, f as renderTemplate, h as addAttribute, n as renderTransition, o as Fragment, p as maybeRenderHead, x as unescapeHTML } from "./server_FTIkVOiY.mjs";
 import { t as createComponent } from "./compiler_B7Puqq8M.mjs";
-import { i as renderScript, n as $$Header, r as $$BaseLayout, t as $$Footer } from "./Footer_Br2m03Kd.mjs";
+import { i as renderScript, n as $$Header, r as $$BaseLayout, t as $$Footer } from "./Footer_DFDe9_Mq.mjs";
 import { f as getPostBySlug } from "./data_B_P01u1Y.mjs";
-import { t as $$LineartField } from "./LineartField_B86tnewd.mjs";
+import { t as $$LineartField } from "./LineartField_DEq2v_Po.mjs";
 import { t as $$BreadcrumbSchema } from "./BreadcrumbSchema_BA5c6Vh2.mjs";
 //#region src/components/seo/ArticleSchema.astro
 createAstro("https://astro.build");
@@ -87,7 +87,7 @@ var $$Slug = createComponent(async ($$result, $$props, $$slots) => {
 	})}</time></div></div></div></section>${post.featuredImage && renderTemplate`<section class="pb-16"><div class="container"><div class="max-w-5xl mx-auto aspect-[16/9] overflow-hidden" data-image-reveal><img${addAttribute(renderTransition($$result2, "5scyomm6", "fade", `blog-image-${post.slug}`), "data-astro-transition-scope")}${addAttribute(post.featuredImage.node.sourceUrl, "src")}${addAttribute(post.featuredImage.node.altText, "alt")}${addAttribute(post.featuredImage.node.width || 1200, "width")}${addAttribute(post.featuredImage.node.height || 630, "height")} class="w-full h-full object-cover" fetchpriority="high"></div></div></section>`}<section class="pb-24"><div class="container"><div class="max-w-3xl mx-auto prose prose-invert prose-lg">${renderComponent($$result2, "Fragment", Fragment, {}, { "default": async ($$result3) => renderTemplate`${unescapeHTML(post.content)}` })}</div></div></section></article><section class="py-24 border-t border-border relative overflow-hidden">${renderComponent($$result2, "LineartField", $$LineartField, {})}<div class="container text-center relative z-10"><h2 class="text-4xl md:text-6xl font-bold mb-8" data-text-reveal><span class="reveal-line block">WANT MORE?</span></h2><div data-reveal="up" data-delay="0.2"><a href="/blog/" class="btn btn-black">← BACK TO THE DROP</a></div></div></section></main>${renderComponent($$result2, "Footer", $$Footer, {})}${renderScript($$result2, "/home/runner/work/thedigitalecho/thedigitalecho/src/pages/blog/[slug].astro?astro&type=script&index=0&lang.ts")}` })}`;
 }, "/home/runner/work/thedigitalecho/thedigitalecho/src/pages/blog/[slug].astro", "self");
 var $$file = "/home/runner/work/thedigitalecho/thedigitalecho/src/pages/blog/[slug].astro";
-var $$url = "/blog/[slug]";
+var $$url = "/blog/[slug]/";
 //#endregion
 //#region \0virtual:astro:page:src/pages/blog/[slug]@_@astro
 var page = () => _slug__exports;

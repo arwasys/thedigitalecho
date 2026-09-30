@@ -1341,7 +1341,7 @@ var cssFitValues = [
 ];
 async function getConfiguredImageService() {
 	if (!globalThis?.astroAsset?.imageService) {
-		const { default: service } = await import("./sharp_BlDiyou3.mjs").catch((e) => {
+		const { default: service } = await import("./sharp_yvo7B_Xd.mjs").catch((e) => {
 			const error = new AstroError(InvalidImageService);
 			error.cause = e;
 			throw error;
@@ -1650,7 +1650,7 @@ new SsrRuntimeFontFileUrlResolver({ urls: /* @__PURE__ */ new Set([]) });
 var assetQueryParams = void 0;
 var imageConfig = {
 	"endpoint": {
-		"route": "/_image",
+		"route": "/_image/",
 		"entrypoint": "astro/assets/endpoint/node"
 	},
 	"service": {

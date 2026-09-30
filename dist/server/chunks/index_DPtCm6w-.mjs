@@ -1,9 +1,9 @@
 import { t as __exportAll } from "./rolldown-runtime_D7D4PA-g.mjs";
 import { C as createAstro, a as renderComponent, f as renderTemplate, h as addAttribute, n as renderTransition, p as maybeRenderHead } from "./server_FTIkVOiY.mjs";
 import { t as createComponent } from "./compiler_B7Puqq8M.mjs";
-import { i as renderScript, n as $$Header, r as $$BaseLayout, t as $$Footer } from "./Footer_Br2m03Kd.mjs";
+import { i as renderScript, n as $$Header, r as $$BaseLayout, t as $$Footer } from "./Footer_DFDe9_Mq.mjs";
 import { _ as getProjects, a as getHeroByPage } from "./data_B_P01u1Y.mjs";
-import { t as $$InnerHero } from "./InnerHero_3FUJV5c7.mjs";
+import { t as $$InnerHero } from "./InnerHero_CyQFoRcj.mjs";
 //#region src/components/ui/OptimizedImage.astro
 createAstro("https://astro.build");
 var $$OptimizedImage = createComponent(($$result, $$props, $$slots) => {
@@ -50,7 +50,7 @@ var $$Index = createComponent(async ($$result, $$props, $$slots) => {
 	})}<div class="absolute inset-0 bg-bg/60 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-end p-8"><div><p class="text-sm text-muted-foreground mb-2">${project.clientName}</p><h2 class="text-2xl md:text-3xl font-bold">${project.title}</h2><p class="text-accent mt-4">VIEW CASE STUDY →</p></div></div></a>`)}</div></div></section></main>${renderComponent($$result, "Footer", $$Footer, {})}${renderScript($$result, "/home/runner/work/thedigitalecho/thedigitalecho/src/pages/projects/index.astro?astro&type=script&index=0&lang.ts")}` })}`;
 }, "/home/runner/work/thedigitalecho/thedigitalecho/src/pages/projects/index.astro", "self");
 var $$file = "/home/runner/work/thedigitalecho/thedigitalecho/src/pages/projects/index.astro";
-var $$url = "/projects";
+var $$url = "/projects/";
 //#endregion
 //#region \0virtual:astro:page:src/pages/projects/index@_@astro
 var page = () => projects_exports;

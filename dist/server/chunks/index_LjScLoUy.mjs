@@ -1,9 +1,9 @@
 import { t as __exportAll } from "./rolldown-runtime_D7D4PA-g.mjs";
 import { a as renderComponent, f as renderTemplate, h as addAttribute, n as renderTransition, p as maybeRenderHead } from "./server_FTIkVOiY.mjs";
 import { t as createComponent } from "./compiler_B7Puqq8M.mjs";
-import { i as renderScript, n as $$Header, r as $$BaseLayout, t as $$Footer } from "./Footer_Br2m03Kd.mjs";
+import { i as renderScript, n as $$Header, r as $$BaseLayout, t as $$Footer } from "./Footer_DFDe9_Mq.mjs";
 import { a as getHeroByPage, p as getPosts } from "./data_B_P01u1Y.mjs";
-import { t as $$InnerHero } from "./InnerHero_3FUJV5c7.mjs";
+import { t as $$InnerHero } from "./InnerHero_CyQFoRcj.mjs";
 //#region src/pages/blog/index.astro
 var blog_exports = /* @__PURE__ */ __exportAll({
 	default: () => $$Index,
@@ -38,7 +38,7 @@ var $$Index = createComponent(async ($$result, $$props, $$slots) => {
 	})}</p></a>`)}</div><div id="no-results" class="hidden text-center py-16"><p class="text-muted-foreground text-lg">No articles found in this category.</p></div></div></section></main>${renderComponent($$result, "Footer", $$Footer, {})}${renderScript($$result, "/home/runner/work/thedigitalecho/thedigitalecho/src/pages/blog/index.astro?astro&type=script&index=0&lang.ts")}` })}`;
 }, "/home/runner/work/thedigitalecho/thedigitalecho/src/pages/blog/index.astro", "self");
 var $$file = "/home/runner/work/thedigitalecho/thedigitalecho/src/pages/blog/index.astro";
-var $$url = "/blog";
+var $$url = "/blog/";
 //#endregion
 //#region \0virtual:astro:page:src/pages/blog/index@_@astro
 var page = () => blog_exports;
