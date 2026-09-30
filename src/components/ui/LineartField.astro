@@ -35,7 +35,14 @@ const images = [
   import { gsap } from 'gsap';
 
   const registry = new Set<gsap.core.Animation>();
+  const sleeps = new Set<number>();
+  let stopped = false;
   const rand = (min: number, max: number) => gsap.utils.random(min, max);
+
+  // At any moment only one group of images is alive: three fade in together,
+  // drift, fade out; when the slowest of the three finishes the next group
+  // takes over. Nine images = three sequential trios, looping forever.
+  const GROUP_SIZE = 3;
 
   const COLS = [
     [2, 28],
@@ -64,63 +71,102 @@ const images = [
     });
   }
 
-  function cycle(img: HTMLImageElement, cell: number) {
+  /** One image, one appearance: fade in → drift → fade out. Resolves when done. */
+  function cycle(img: HTMLImageElement, cell: number, startDelay: number): Promise<void> {
     place(img, cell);
 
-    const tl = gsap.timeline({
-      delay: rand(0.4, 5),
-      onComplete: () => {
-        registry.delete(tl);
-        cycle(img, cell);
-      },
-    });
-
-    registry.add(tl);
-
-    tl.fromTo(
-      img,
-      { opacity: 0 },
-      { opacity: rand(0.15, 0.3), duration: rand(1.6, 3.4), ease: 'sine.out' },
-    )
-      .to(
-        img,
-        {
-          x: rand(-70, 70),
-          y: rand(-50, 50),
-          rotation: rand(-30, 30),
-          duration: rand(8, 15),
-          ease: 'sine.inOut',
+    return new Promise((resolve) => {
+      const tl = gsap.timeline({
+        delay: startDelay,
+        onComplete: () => {
+          registry.delete(tl);
+          resolve();
         },
-        '<',
+      });
+
+      registry.add(tl);
+
+      tl.fromTo(
+        img,
+        { opacity: 0 },
+        { opacity: rand(0.15, 0.3), duration: rand(1.6, 3.4), ease: 'sine.out' },
       )
-      .to(img, { opacity: 0, duration: rand(1.6, 3.4), ease: 'sine.in' })
-      .to({}, { duration: rand(2, 7) });
+        .to(
+          img,
+          {
+            x: rand(-70, 70),
+            y: rand(-50, 50),
+            rotation: rand(-30, 30),
+            duration: rand(8, 15),
+            ease: 'sine.inOut',
+          },
+          '<',
+        )
+        .to(img, { opacity: 0, duration: rand(1.6, 3.4), ease: 'sine.in' });
+    });
+  }
+
+  function wait(ms: number): Promise<void> {
+    return new Promise((resolve) => {
+      const timer = window.setTimeout(() => {
+        sleeps.delete(timer);
+        resolve();
+      }, ms);
+      sleeps.add(timer);
+    });
+  }
+
+  async function runGroups(
+    entries: { img: HTMLImageElement; cell: number }[],
+  ): Promise<void> {
+    const groups: { img: HTMLImageElement; cell: number }[][] = [];
+    for (let i = 0; i < entries.length; i += GROUP_SIZE) {
+      groups.push(entries.slice(i, i + GROUP_SIZE));
+    }
+
+    while (!stopped) {
+      for (const group of groups) {
+        if (stopped) return;
+        // The trio starts nearly together — just a whisper of stagger.
+        await Promise.all(
+          group.map(({ img, cell }, i) => cycle(img, cell, i === 0 ? rand(0, 0.4) : rand(0.3, 0.9))),
+        );
+        if (stopped) return;
+        await wait(rand(1500, 3500));
+      }
+    }
   }
 
   function init() {
+    stopped = false;
     document.querySelectorAll<HTMLElement>('[data-lineart-field]').forEach((field) => {
       if (field.dataset.init) return;
       field.dataset.init = '1';
 
-      const imgs = field.querySelectorAll<HTMLImageElement>('[data-lineart-float]');
+      const imgs = Array.from(field.querySelectorAll<HTMLImageElement>('[data-lineart-float]'));
       const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
       // shuffle 9 grid cells so each image owns a spawn zone (no clustering)
       const cells = gsap.utils.shuffle([0, 1, 2, 3, 4, 5, 6, 7, 8]);
 
-      imgs.forEach((img, i) => {
-        const cell = cells[i % cells.length];
-        place(img, cell);
-        if (reduced) {
+      if (reduced) {
+        imgs.forEach((img, i) => {
+          place(img, cells[i % cells.length]);
           gsap.set(img, { opacity: rand(0.12, 0.2) });
-          return;
-        }
-        cycle(img, cell);
-      });
+        });
+        return;
+      }
+
+      const entries = imgs.map((img, i) => ({ img, cell: cells[i % cells.length] }));
+      entries.forEach(({ img, cell }) => place(img, cell));
+      void runGroups(entries);
     });
   }
 
   function cleanup() {
+    stopped = true;
+    sleeps.forEach((timer) => clearTimeout(timer));
+    sleeps.clear();
     registry.forEach((tl) => tl.kill());
     registry.clear();
   }
