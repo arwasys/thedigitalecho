@@ -59,13 +59,17 @@ const USE_MOCK_DATA =
   import.meta.env.WORDPRESS_GRAPHQL_URL === 'https://example.com/graphql';
 
 /**
- * Shared catch handler. With STRICT_FETCH=1 (CI + production .env) the error
- * is rethrown so builds and SSR requests fail loudly instead of silently
- * serving mock/fallback content; otherwise it is logged and the caller falls
- * back as before.
+ * Shared catch handler. Strict mode must be active while `astro build`
+ * prerenders pages (CI sets STRICT_FETCH=1 for the build process) so broken
+ * WordPress data fails the build loudly — but it must NOT be baked into the
+ * deployed bundle, or every SSR request would hard-fail whenever WordPress
+ * is unreachable. Hence the second condition: the running server only goes
+ * strict if its own process env opts in (never do this on cPanel — the site
+ * must degrade gracefully and serve stale content instead).
  */
 function fetchFailed(error: unknown, message: string): void {
-  const strict = import.meta.env.STRICT_FETCH === '1';
+  const runtimeEnv = (globalThis as { process?: { env?: Record<string, string | undefined> } }).process?.env;
+  const strict = import.meta.env.STRICT_FETCH === '1' && runtimeEnv?.STRICT_FETCH === '1';
   if (strict) throw error;
   console.error(message, error);
 }
