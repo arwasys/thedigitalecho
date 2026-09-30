@@ -1,0 +1,1 @@
+import{n as e,t}from"./smooth-scroll.BDr57oHp.js";e(),document.addEventListener(`astro:page-load`,e),document.addEventListener(`astro:before-swap`,t);

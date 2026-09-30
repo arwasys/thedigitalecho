@@ -1,9 +1,9 @@
 import { t as __exportAll } from "./rolldown-runtime_D7D4PA-g.mjs";
 import { C as createAstro, a as renderComponent, f as renderTemplate, h as addAttribute, n as renderTransition, p as maybeRenderHead } from "./server_FTIkVOiY.mjs";
 import { t as createComponent } from "./compiler_B7Puqq8M.mjs";
-import { i as renderScript, n as $$Header, r as $$BaseLayout, t as $$Footer } from "./Footer_Bf44ULlV.mjs";
+import { i as renderScript, n as $$Header, r as $$BaseLayout, t as $$Footer } from "./Footer_BMX3sx4e.mjs";
 import { _ as getProjects, a as getHeroByPage } from "./data_DjV83Vdc.mjs";
-import { t as $$InnerHero } from "./InnerHero_DZpJTrOO.mjs";
+import { t as $$InnerHero } from "./InnerHero_B_NRYTSE.mjs";
 //#region src/components/ui/OptimizedImage.astro
 createAstro("https://astro.build");
 var $$OptimizedImage = createComponent(($$result, $$props, $$slots) => {
