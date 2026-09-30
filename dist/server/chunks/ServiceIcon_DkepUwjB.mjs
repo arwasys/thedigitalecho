@@ -1,0 +1,29 @@
+import { C as createAstro, f as renderTemplate, h as addAttribute, p as maybeRenderHead, x as unescapeHTML } from "./server_FTIkVOiY.mjs";
+import { t as createComponent } from "./compiler_B7Puqq8M.mjs";
+//#region src/components/ui/ServiceIcon.astro
+createAstro("https://astro.build");
+var $$ServiceIcon = createComponent(($$result, $$props, $$slots) => {
+	const Astro = $$result.createAstro($$props, $$slots);
+	Astro.self = $$ServiceIcon;
+	const { service, class: className = "" } = Astro.props;
+	const icons = {
+		photography: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>`,
+		videography: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"></polygon><rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect></svg>`,
+		"drone-photography": `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="12" width="12" height="6" rx="1"></rect><circle cx="8" cy="8" r="2"></circle><circle cx="16" cy="8" r="2"></circle><line x1="8" y1="10" x2="8" y2="12"></line><line x1="16" y1="10" x2="16" y2="12"></line><line x1="6" y1="15" x2="2" y2="15"></line><line x1="18" y1="15" x2="22" y2="15"></line></svg>`,
+		"drone-videography": `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="12" width="12" height="6" rx="1"></rect><circle cx="8" cy="8" r="2"></circle><circle cx="16" cy="8" r="2"></circle><line x1="8" y1="10" x2="8" y2="12"></line><line x1="16" y1="10" x2="16" y2="12"></line><polygon points="10 16 14 16 14 18 10 18"></polygon></svg>`,
+		"social-media-management": `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path><line x1="12" y1="2" x2="12" y2="4"></line><line x1="4.93" y1="4.93" x2="6.34" y2="6.34"></line><line x1="19.07" y1="4.93" x2="17.66" y2="6.34"></line></svg>`,
+		"digital-marketing": `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="20" x2="12" y2="10"></line><line x1="18" y1="20" x2="18" y2="4"></line><line x1="6" y1="20" x2="6" y2="16"></line></svg>`,
+		"content-production": `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>`,
+		seo: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>`,
+		default: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>`
+	};
+	function getIcon(slug) {
+		if (icons[slug]) return icons[slug];
+		for (const key of Object.keys(icons)) if (slug.includes(key) || key.includes(slug)) return icons[key];
+		return icons.default;
+	}
+	const iconHtml = getIcon(service);
+	return renderTemplate`${maybeRenderHead($$result)}<div${addAttribute(`service-card__icon ${className}`, "class")}>${unescapeHTML(iconHtml)}</div>`;
+}, "/home/runner/work/thedigitalecho/thedigitalecho/src/components/ui/ServiceIcon.astro", void 0);
+//#endregion
+export { $$ServiceIcon as t };

@@ -1,0 +1,1 @@
+import{a as e,i as t,n,o as r,r as i,s as a,t as o}from"./reveal.B9lKjpXk.js";import{t as s}from"./magnetic.BEuUhDO4.js";var c=!1;function l(){c||!document.querySelector(`main[data-page="home"]`)||(c=!0,o(),e(),a(),i(),t(),r(),s(),n())}l(),document.addEventListener(`astro:page-load`,l),document.addEventListener(`astro:before-swap`,()=>{c=!1});

@@ -1,0 +1,1 @@
+import{a as e,s as t,t as n}from"./reveal.B9lKjpXk.js";var r=!1;function i(){r||!document.querySelector(`main[data-page="cookie"]`)||(r=!0,n(),e(),t())}document.addEventListener(`DOMContentLoaded`,i),document.addEventListener(`astro:page-load`,i),document.addEventListener(`astro:before-swap`,()=>{r=!1});
