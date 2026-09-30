@@ -14,6 +14,8 @@ export default defineConfig({
   // cPanel runs the standalone server: node dist/server/entry.mjs
   output: 'server',
   adapter: node({ mode: 'standalone' }),
+  // One URL per page: /about → 308 → /about/ (matches sitemap + canonicals)
+  trailingSlash: 'always',
   // Warm link targets on hover so ClientRouter navigations don't wait on a
   // server render after the click (dev SSR + WPGraphQL was a multi-second stall)
   prefetch: {

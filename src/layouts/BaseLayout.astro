@@ -28,13 +28,19 @@ const siteUrl = import.meta.env.PUBLIC_SITE_URL || 'http://localhost:4321';
 const seoTitle = seo?.title || (title === 'Home' ? `${settings.title} | ${settings.description}` : `${title} | ${settings.title}`);
 const fullTitle = seoTitle;
 const metaDescription = seo?.description || description || settings.description;
-const canonicalUrl = seo?.canonical || `${siteUrl}${Astro.url.pathname}`;
-const seoOgImage = seo?.ogImage || ogImage;
+// Canonical is always derived locally: WP stores absolute URLs on its own
+// domain (tde.arwasys.in / legacy thedigitalecho.com) and often with a
+// different path shape (/service/ vs /services/), so seo.canonical is untrusted.
+const canonicalUrl = `${siteUrl}${Astro.url.pathname}`;
+// WP og/twitter images may be absolute (own domain) or site-relative.
+const toAbsoluteUrl = (value: string): string =>
+  !value ? '' : value.startsWith('http') ? value : `${siteUrl}${value.startsWith('/') ? '' : '/'}${value}`;
+const seoOgImage = toAbsoluteUrl(seo?.ogImage || ogImage);
 const seoOgTitle = seo?.ogTitle || fullTitle;
 const seoOgDescription = seo?.ogDescription || metaDescription;
 const seoTwitterTitle = seo?.twitterTitle || fullTitle;
 const seoTwitterDescription = seo?.twitterDescription || metaDescription;
-const seoTwitterImage = seo?.twitterImage || seoOgImage;
+const seoTwitterImage = toAbsoluteUrl(seo?.twitterImage || seoOgImage);
 ---
 
 <!doctype html>
@@ -48,7 +54,7 @@ const seoTwitterImage = seo?.twitterImage || seoOgImage;
     <!-- Open Graph -->
     <meta property="og:title" content={seoOgTitle} />
     <meta property="og:description" content={seoOgDescription} />
-    <meta property="og:image" content={`${siteUrl}${seoOgImage}`} />
+    <meta property="og:image" content={seoOgImage} />
     <meta property="og:url" content={canonicalUrl} />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content={settings.title} />
@@ -57,7 +63,7 @@ const seoTwitterImage = seo?.twitterImage || seoOgImage;
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={seoTwitterTitle} />
     <meta name="twitter:description" content={seoTwitterDescription} />
-    <meta name="twitter:image" content={`${siteUrl}${seoTwitterImage}`} />
+    <meta name="twitter:image" content={seoTwitterImage} />
 
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />

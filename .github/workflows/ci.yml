@@ -34,5 +34,8 @@ jobs:
           WORDPRESS_GRAPHQL_URL: ${{ secrets.WORDPRESS_GRAPHQL_URL }}
           PUBLIC_SITE_URL: ${{ secrets.PUBLIC_SITE_URL }}
           PUBLIC_LOGO_URL: ${{ secrets.PUBLIC_LOGO_URL }}
+          PUBLIC_GA_ID: ${{ secrets.PUBLIC_GA_ID }}
+          PUBLIC_META_PIXEL_ID: ${{ secrets.PUBLIC_META_PIXEL_ID }}
+          PUBLIC_LINKEDIN_PARTNER_ID: ${{ secrets.PUBLIC_LINKEDIN_PARTNER_ID }}
           STRICT_FETCH: "1"
         run: npm run build
