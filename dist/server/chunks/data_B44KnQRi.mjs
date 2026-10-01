@@ -1380,6 +1380,9 @@ var mockBrandStatement = {
 };
 //#endregion
 //#region src/lib/data.ts
+var DOTTED_LOGO_MARKER = "the-Digital-Echo-Logo.svg";
+var configuredLogo = "https://tde.arwasys.in/wp-content/uploads/2026/08/the-Digital-Echo-Logo.svg";
+var SITE_LOGO_URL = configuredLogo.includes(DOTTED_LOGO_MARKER) ? "/assets/tde-logo.svg" : configuredLogo;
 function fetchFailed(error, message) {
 	if ((globalThis.process?.env)?.STRICT_FETCH === "1") throw error;
 	console.error(message, error);
@@ -1542,7 +1545,7 @@ async function getSiteSettings() {
 			title: settings.title || "The Digital Echo",
 			description: settings.description || "Digital Marketing & Content Production",
 			url: settings.url || "http://localhost:4321",
-			logo: "https://tde.arwasys.in/wp-content/uploads/2026/08/the-Digital-Echo-Logo.svg"
+			logo: SITE_LOGO_URL
 		};
 	} catch (e) {
 		fetchFailed(e, "Failed to fetch site settings:");
@@ -1550,7 +1553,7 @@ async function getSiteSettings() {
 			title: "The Digital Echo",
 			description: "Digital Marketing & Content Production",
 			url: "http://localhost:4321",
-			logo: "https://tde.arwasys.in/wp-content/uploads/2026/08/the-Digital-Echo-Logo.svg"
+			logo: SITE_LOGO_URL
 		};
 	}
 }
@@ -2175,4 +2178,4 @@ async function getIndustriesSection() {
 	}
 }
 //#endregion
-export { getSiteText as C, parseContentSections as D, htmlToText as E, mockBrandStatement as O, getSiteSettings as S, getWhyChooseUs as T, getProjects as _, getHeroByPage as a, getSiteContact as b, getIndustriesSection as c, getPageContent as d, getPostBySlug as f, getProjectBySlug as g, getProcessSteps as h, getFeaturedProjects as i, getMenus as l, getPricingPlans as m, getContactForm as n, getHeroes as o, getPosts as p, getFaqs as r, getHomeSections as s, getBrandStatement as t, getOffices as u, getServiceBySlug as v, getTestimonials as w, getSiteData as x, getServices as y };
+export { getSiteSettings as C, htmlToText as D, getWhyChooseUs as E, parseContentSections as O, getSiteData as S, getTestimonials as T, getProjectBySlug as _, getFeaturedProjects as a, getServices as b, getHomeSections as c, getOffices as d, getPageContent as f, getProcessSteps as g, getPricingPlans as h, getFaqs as i, mockBrandStatement as k, getIndustriesSection as l, getPosts as m, getBrandStatement as n, getHeroByPage as o, getPostBySlug as p, getContactForm as r, getHeroes as s, SITE_LOGO_URL as t, getMenus as u, getProjects as v, getSiteText as w, getSiteContact as x, getServiceBySlug as y };

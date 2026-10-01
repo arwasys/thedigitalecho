@@ -1,6 +1,6 @@
 import { C as createAstro, a as renderComponent, f as renderTemplate, g as createRenderInstruction, h as addAttribute, l as renderSlot, m as renderHead, n as renderTransition, p as maybeRenderHead } from "./server_FTIkVOiY.mjs";
 import { t as createComponent } from "./compiler_B7Puqq8M.mjs";
-import { E as htmlToText, S as getSiteSettings, b as getSiteContact, l as getMenus, o as getHeroes, x as getSiteData, y as getServices } from "./data_DjV83Vdc.mjs";
+import { C as getSiteSettings, D as htmlToText, S as getSiteData, b as getServices, d as getOffices, s as getHeroes, u as getMenus, x as getSiteContact } from "./data_B44KnQRi.mjs";
 //#region node_modules/astro/dist/runtime/server/render/script.js
 async function renderScript(result, id) {
 	const inlined = result.inlinedScripts.get(id);
@@ -86,6 +86,25 @@ function getContactLinks(contact) {
 		socials
 	};
 }
+//#endregion
+//#region src/components/ui/LineartField.astro
+createAstro("https://astro.build");
+var $$LineartField = createComponent(($$result, $$props, $$slots) => {
+	const Astro = $$result.createAstro($$props, $$slots);
+	Astro.self = $$LineartField;
+	const { class: className = "" } = Astro.props;
+	return renderTemplate`${maybeRenderHead($$result)}<div${addAttribute(`lineart-field ${className}`, "class")} data-lineart-field aria-hidden="true" data-astro-cid-mfgcvck6>${[
+		"corporate-photography.webp",
+		"digitaloffice.webp",
+		"drone-photography..webp",
+		"photgrapher.webp",
+		"product-photography.webp",
+		"socialmedia.webp",
+		"sport-photography.webp",
+		"video-editor.webp",
+		"videographer.webp"
+	].map((src) => renderTemplate`<img${addAttribute(`/assets/lineart/${src}`, "src")} alt="" loading="lazy" decoding="async" class="lineart-float" data-lineart-float data-astro-cid-mfgcvck6>`)}</div>${renderScript($$result, "/home/runner/work/thedigitalecho/thedigitalecho/src/components/ui/LineartField.astro?astro&type=script&index=0&lang.ts")}`;
+}, "/home/runner/work/thedigitalecho/thedigitalecho/src/components/ui/LineartField.astro", void 0);
 //#endregion
 //#region src/components/layout/FullscreenNav.astro
 var $$FullscreenNav = createComponent(async ($$result, $$props, $$slots) => {
@@ -174,10 +193,10 @@ var $$FullscreenNav = createComponent(async ($$result, $$props, $$slots) => {
 		headings: [],
 		items: serviceItems
 	};
-	return renderTemplate`${maybeRenderHead($$result)}<div id="fullscreen-nav" class="fullscreen-nav" data-open="false"><button id="nav-close" class="fullscreen-nav__close" aria-label="Close menu"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button><!-- Logo — top center --><div class="fullscreen-nav__logo">${settings.logo ? renderTemplate`<a href="/" class="fullscreen-nav__logo-link"><img${addAttribute(settings.logo, "src")}${addAttribute(settings.title, "alt")} class="h-14 md:h-20 w-auto"></a>` : renderTemplate`<a href="/" class="fullscreen-nav__logo-text">THE <span>DIGITAL</span> ECHO</a>`}</div><div class="fullscreen-nav__inner"><!-- Left: Menu Items --><nav class="fullscreen-nav__menu" aria-label="Main menu">${items.map((item, index) => {
+	return renderTemplate`${maybeRenderHead($$result)}<div id="fullscreen-nav" class="fullscreen-nav" data-open="false"><button id="nav-close" class="fullscreen-nav__close" aria-label="Close menu"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button><!-- Logo + slogan — top center --><div class="fullscreen-nav__logo"><div class="fullscreen-nav__logo-stack">${settings.logo ? renderTemplate`<a href="/" class="fullscreen-nav__logo-link"><img${addAttribute(settings.logo, "src")}${addAttribute(settings.title, "alt")} class="h-16 md:h-20 w-auto"></a>` : renderTemplate`<a href="/" class="fullscreen-nav__logo-text">THE <span>DIGITAL</span> ECHO</a>`}<img${addAttribute("https://tde.arwasys.in/wp-content/uploads/2026/10/slogan_1.svg", "src")} alt="Let's Make Some Noise." width="1089" height="124" class="fullscreen-nav__slogan"></div></div><div class="fullscreen-nav__inner"><!-- Left: Menu Items --><nav class="fullscreen-nav__menu" aria-label="Main menu">${items.map((item, index) => {
 		const key = normPath(item.href);
 		return renderTemplate`<a${addAttribute(item.href, "href")}${addAttribute(["fullscreen-nav__item", key === "/contact" && "text-accent"], "class:list")}${addAttribute(panels[key] ? key : null, "data-nav-panel")}><span class="fullscreen-nav__number">${String(index + 1).padStart(2, "0")}</span><span class="fullscreen-nav__label">${item.label}</span></a>`;
-	})}</nav><!-- Right: hover reveal panel --><div class="fullscreen-nav__panel">${Object.entries(panels).map(([key, panel]) => {
+	})}</nav><!-- Right: hover reveal panel (lineart animation runs by default and behind hovered content) --><div class="fullscreen-nav__panel"><div class="fullscreen-nav__panel-art" aria-hidden="true">${renderComponent($$result, "LineartField", $$LineartField, {})}</div>${Object.entries(panels).map(([key, panel]) => {
 		const Wrapper = panel.href && !panel.items ? "a" : "div";
 		const wrapperHref = panel.href && !panel.items ? panel.href : void 0;
 		return renderTemplate`<div class="fullscreen-nav__panel-list"${addAttribute(key, "data-panel")}>${renderComponent($$result, "Wrapper", Wrapper, {
@@ -224,19 +243,24 @@ var $$BaseLayout = createComponent(async ($$result, $$props, $$slots) => {
 //#region src/components/layout/Header.astro
 var $$Header = createComponent(async ($$result, $$props, $$slots) => {
 	const settings = await getSiteSettings();
-	return renderTemplate`${maybeRenderHead($$result)}<header${addAttribute(renderTransition($$result, "cykaeyu2", "none", "header"), "data-astro-transition-scope")} id="site-header" class="fixed top-0 left-0 right-0 z-50 transition-all duration-500"><div class="container flex items-center justify-between py-4 md:py-6"><!-- Logo --><a href="/" class="flex items-center hover:opacity-80 transition-opacity duration-300 relative z-10">${settings.logo ? renderTemplate`<img${addAttribute(settings.logo, "src")}${addAttribute(settings.title, "alt")} class="h-20 md:h-24 w-auto">` : renderTemplate`<span class="text-sm font-bold tracking-widest uppercase transition-colors duration-300">THE <span class="text-accent">DIGITAL</span> ECHO</span>`}</a><!-- Right Side: CTA + Hamburger --><div class="flex items-center gap-6 relative z-10"><a href="/contact/" class="btn btn-blue btn-sm hidden md:inline-flex" data-magnetic="0.3">LET'S TALK →</a><!-- Hamburger Menu Toggle --><button id="menu-toggle" class="flex flex-col gap-2 p-2 group" aria-label="Toggle menu" aria-expanded="false"><span class="w-8 h-0.5 bg-text transition-all duration-300 group-hover:bg-accent"></span><span class="w-8 h-0.5 bg-text transition-all duration-300 group-hover:bg-accent"></span></button></div></div></header>${renderScript($$result, "/home/runner/work/thedigitalecho/thedigitalecho/src/components/layout/Header.astro?astro&type=script&index=0&lang.ts")}`;
+	return renderTemplate`${maybeRenderHead($$result)}<header${addAttribute(renderTransition($$result, "cykaeyu2", "none", "header"), "data-astro-transition-scope")} id="site-header" class="fixed top-0 left-0 right-0 z-50 transition-all duration-500"><div class="container flex items-center justify-between py-4 md:py-6"><!-- Logo + slogan --><div class="flex flex-col items-start gap-1.5 relative z-10"><a href="/" class="flex items-center hover:opacity-80 transition-opacity duration-300">${settings.logo ? renderTemplate`<img${addAttribute(settings.logo, "src")}${addAttribute(settings.title, "alt")} class="h-16 md:h-20 w-auto">` : renderTemplate`<span class="text-sm font-bold tracking-widest uppercase transition-colors duration-300">THE <span class="text-accent">DIGITAL</span> ECHO</span>`}</a><img${addAttribute("https://tde.arwasys.in/wp-content/uploads/2026/10/slogan_1.svg", "src")} alt="Let's Make Some Noise." width="1089" height="124" class="h-4 md:h-5 w-auto"></div><!-- Right Side: CTA + Hamburger --><div class="flex items-center gap-6 relative z-10"><a href="/contact/" class="btn btn-blue btn-sm hidden md:inline-flex" data-magnetic="0.3">LET'S TALK →</a><!-- Hamburger Menu Toggle --><button id="menu-toggle" class="flex flex-col gap-2 p-2 group" aria-label="Toggle menu" aria-expanded="false"><span class="w-8 h-0.5 bg-text transition-all duration-300 group-hover:bg-accent"></span><span class="w-8 h-0.5 bg-text transition-all duration-300 group-hover:bg-accent"></span></button></div></div></header>${renderScript($$result, "/home/runner/work/thedigitalecho/thedigitalecho/src/components/layout/Header.astro?astro&type=script&index=0&lang.ts")}`;
 }, "/home/runner/work/thedigitalecho/thedigitalecho/src/components/layout/Header.astro", "self");
 //#endregion
 //#region src/components/layout/Footer.astro
 var $$Footer = createComponent(async ($$result, $$props, $$slots) => {
-	const [settings, menus, siteData] = await Promise.all([
+	const [settings, menus, siteData, services, offices] = await Promise.all([
 		getSiteSettings(),
 		getMenus(),
-		getSiteData()
+		getSiteData(),
+		getServices(),
+		getOffices()
 	]);
 	const { footer, contact } = siteData;
 	const currentYear = (/* @__PURE__ */ new Date()).getFullYear();
-	const fallbackExplore = [
+	const exploreLinks = menus.primary.length ? menus.primary.map((item) => ({
+		label: item.label,
+		url: item.url
+	})) : menus.footerExplore.length ? menus.footerExplore : [
 		{
 			label: "What We Do",
 			url: "/services/"
@@ -258,39 +282,16 @@ var $$Footer = createComponent(async ($$result, $$props, $$slots) => {
 			url: "/contact/"
 		}
 	];
-	const fallbackSocial = [
-		{
-			label: "Instagram",
-			url: "https://instagram.com/thedigitalecho"
-		},
-		{
-			label: "LinkedIn",
-			url: "https://linkedin.com/company/thedigitalecho"
-		},
-		{
-			label: "Facebook",
-			url: "https://facebook.com/thedigitalecho"
-		},
-		{
-			label: "WhatsApp",
-			url: contact.contactWhatsappUrl || "https://wa.me/"
-		},
-		{
-			label: "YouTube",
-			url: "https://youtube.com/@thedigitalecho"
-		}
-	];
-	const exploreLinks = menus.primary.length ? menus.primary.map((item) => ({
-		label: item.label,
-		url: item.url
-	})) : menus.footerExplore.length ? menus.footerExplore : fallbackExplore;
-	const platformLinks = menus.footerPlatforms;
-	const socialLinks = menus.footerSocial.length ? menus.footerSocial : fallbackSocial;
+	const serviceLinks = services.map((service) => ({
+		label: service.title,
+		url: `/services/${service.slug}/`
+	}));
 	const { whatsappHref, whatsappLabel, socials: contactSocials } = getContactLinks(contact);
-	function isExternal(url) {
-		return /^https?:\/\//.test(url);
-	}
-	return renderTemplate`${maybeRenderHead($$result)}<footer class="border-t border-border"><div class="container py-16 md:py-24"><!-- Logo --><div class="mb-12 md:mb-16"><a href="/" class="inline-block hover:opacity-80 transition-opacity duration-300">${settings.logo ? renderTemplate`<img${addAttribute(settings.logo, "src")}${addAttribute(settings.title, "alt")} class="h-16 md:h-20 w-auto">` : renderTemplate`<span class="text-lg font-bold tracking-widest uppercase">THE DIGITAL ECHO</span>`}</a>${footer.footerBlurb && renderTemplate`<p class="mt-4 max-w-md text-sm text-muted-foreground">${footer.footerBlurb}</p>`}</div><!-- Links Grid --><div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16 min-w-0 [overflow-wrap:anywhere]"><!-- Explore --><div><h3 class="text-xs font-medium tracking-wider uppercase text-accent-blue mb-6">Navigate</h3><nav class="flex flex-col gap-3">${exploreLinks.map((link) => renderTemplate`<a${addAttribute(link.url, "href")} class="text-lg hover:text-accent transition-colors duration-300">${link.label}</a>`)}</nav></div><!-- Platform -->${platformLinks.length > 0 && renderTemplate`<div><h3 class="text-xs font-medium tracking-wider uppercase text-accent-blue mb-6">Platform</h3><nav class="flex flex-col gap-3">${platformLinks.map((link) => renderTemplate`<a${addAttribute(link.url, "href")} class="text-lg hover:text-accent transition-colors duration-300"${addAttribute(isExternal(link.url) ? "_blank" : void 0, "target")}${addAttribute(isExternal(link.url) ? "noopener noreferrer" : void 0, "rel")}>${link.label}</a>`)}</nav></div>`}<!-- Social --><div><h3 class="text-xs font-medium tracking-wider uppercase text-accent-blue mb-6">Connect</h3><nav class="flex flex-col gap-3">${socialLinks.map((link) => renderTemplate`<a${addAttribute(link.url, "href")} class="text-lg hover:text-accent transition-colors duration-300"${addAttribute(isExternal(link.url) ? "_blank" : void 0, "target")}${addAttribute(isExternal(link.url) ? "noopener noreferrer" : void 0, "rel")}>${link.label}</a>`)}</nav></div><!-- Contact --><div><h3 class="text-xs font-medium tracking-wider uppercase text-accent-blue mb-6">Contact</h3><div class="flex flex-col gap-3 text-lg">${contact.contactEmail && renderTemplate`<a${addAttribute(`mailto:${contact.contactEmail}`, "href")} class="hover:text-accent transition-colors duration-300">${contact.contactEmail}</a>`}${whatsappHref && renderTemplate`<a${addAttribute(whatsappHref, "href")} class="hover:text-accent transition-colors duration-300" target="_blank" rel="noopener noreferrer">${whatsappLabel}</a>`}${contact.contactPhone && renderTemplate`<a${addAttribute(`tel:${contact.contactPhone.replace(/\s+/g, "")}`, "href")} class="hover:text-accent transition-colors duration-300">${contact.contactPhone}</a>`}</div>${contactSocials.length > 0 && renderTemplate`<div class="mt-5 flex flex-wrap gap-x-5 gap-y-2">${contactSocials.map((social) => renderTemplate`<a${addAttribute(social.url, "href")} class="text-sm tracking-wider uppercase text-muted-foreground hover:text-accent transition-colors duration-300" target="_blank" rel="noopener noreferrer">${social.label}</a>`)}</div>`}</div></div><!-- Bottom Bar --><div class="flex flex-col md:flex-row items-center justify-between gap-4 pt-8 border-t border-border"><p class="text-sm text-muted-foreground">${footer.footerCopyright || `© ${currentYear} ${settings.title}. All rights reserved.`}</p><nav class="flex gap-4 text-sm text-muted-foreground"><a href="/privacy-policy/" class="hover:text-accent transition-colors duration-300">Privacy</a><a href="/terms-and-conditions/" class="hover:text-accent transition-colors duration-300">Terms</a><a href="/cookie-policy/" class="hover:text-accent transition-colors duration-300">Cookies</a></nav><p class="text-sm text-muted-foreground font-medium tracking-wider">${footer.footerTagLine || "CREATE. CONNECT. ECHO."}</p></div></div></footer>`;
+	const headOffice = offices.find((office) => /head/i.test(office.companyType)) || offices[0];
+	const officeAddress = headOffice?.address || contact.contactAddress || "";
+	const officePhones = (headOffice ? [headOffice.phone1, headOffice.phone2] : [contact.contactPhone]).map((phone) => phone.trim()).filter(Boolean);
+	const contactEmail = contact.contactEmail || headOffice?.email || "";
+	return renderTemplate`${maybeRenderHead($$result)}<footer class="border-t border-border"><div class="container py-16 md:py-24"><!-- Logo + slogan --><div class="mb-12 md:mb-16"><a href="/" class="inline-block hover:opacity-80 transition-opacity duration-300">${settings.logo ? renderTemplate`<img${addAttribute(settings.logo, "src")}${addAttribute(settings.title, "alt")} class="h-16 md:h-20 w-auto">` : renderTemplate`<span class="text-lg font-bold tracking-widest uppercase">THE DIGITAL ECHO</span>`}</a><img${addAttribute("https://tde.arwasys.in/wp-content/uploads/2026/10/slogan_1.svg", "src")} alt="Let's Make Some Noise." width="1089" height="124" class="mt-2 block h-5 md:h-6 w-auto">${footer.footerBlurb && renderTemplate`<p class="mt-4 max-w-md text-sm text-muted-foreground">${footer.footerBlurb}</p>`}</div><!-- Links Grid --><div class="grid grid-cols-1 md:grid-cols-3 gap-12 mb-16 min-w-0 [overflow-wrap:anywhere]"><!-- Navigate --><div><h3 class="text-xs font-medium tracking-wider uppercase text-accent-blue mb-6">Navigate</h3><nav class="flex flex-col gap-3">${exploreLinks.map((link) => renderTemplate`<a${addAttribute(link.url, "href")} class="text-lg hover:text-accent transition-colors duration-300">${link.label}</a>`)}</nav></div><!-- Services --><div><h3 class="text-xs font-medium tracking-wider uppercase text-accent-blue mb-6">Services</h3><nav class="flex flex-col gap-3">${serviceLinks.map((link) => renderTemplate`<a${addAttribute(link.url, "href")} class="text-lg hover:text-accent transition-colors duration-300">${link.label}</a>`)}</nav></div><!-- Contact --><div><h3 class="text-xs font-medium tracking-wider uppercase text-accent-blue mb-6">Contact</h3><div class="flex flex-col gap-3 text-lg">${officeAddress && renderTemplate`<p class="whitespace-pre-line text-muted-foreground">${officeAddress}</p>`}${officePhones.map((phone) => renderTemplate`<a${addAttribute(`tel:${phone.replace(/\s+/g, "")}`, "href")} class="hover:text-accent transition-colors duration-300">${phone}</a>`)}${whatsappHref && renderTemplate`<a${addAttribute(whatsappHref, "href")} class="hover:text-accent transition-colors duration-300" target="_blank" rel="noopener noreferrer">${whatsappLabel}</a>`}${contactEmail && renderTemplate`<a${addAttribute(`mailto:${contactEmail}`, "href")} class="hover:text-accent transition-colors duration-300">${contactEmail}</a>`}</div>${contactSocials.length > 0 && renderTemplate`<div class="mt-5 flex flex-wrap gap-x-5 gap-y-2">${contactSocials.map((social) => renderTemplate`<a${addAttribute(social.url, "href")} class="text-sm tracking-wider uppercase text-muted-foreground hover:text-accent transition-colors duration-300" target="_blank" rel="noopener noreferrer">${social.label}</a>`)}</div>`}</div></div><!-- Bottom Bar --><div class="flex flex-col md:flex-row items-center justify-between gap-4 pt-8 border-t border-border"><p class="text-sm text-muted-foreground">${footer.footerCopyright || `© ${currentYear} ${settings.title}. All rights reserved.`}</p><nav class="flex gap-4 text-sm text-muted-foreground"><a href="/privacy-policy/" class="hover:text-accent transition-colors duration-300">Privacy</a><a href="/terms-and-conditions/" class="hover:text-accent transition-colors duration-300">Terms</a><a href="/cookie-policy/" class="hover:text-accent transition-colors duration-300">Cookies</a></nav><p class="text-sm text-muted-foreground font-medium tracking-wider">${footer.footerTagLine || "CREATE. CONNECT. ECHO."}</p></div></div></footer>`;
 }, "/home/runner/work/thedigitalecho/thedigitalecho/src/components/layout/Footer.astro", void 0);
 //#endregion
-export { renderScript as i, $$Header as n, $$BaseLayout as r, $$Footer as t };
+export { renderScript as a, $$LineartField as i, $$Header as n, $$BaseLayout as r, $$Footer as t };
