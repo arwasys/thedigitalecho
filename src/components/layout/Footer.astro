@@ -1,8 +1,14 @@
 ---
-import { getSiteSettings, getMenus, getSiteData } from '../../lib/data';
+import { getSiteSettings, getMenus, getSiteData, getServices, getOffices } from '../../lib/data';
 import { getContactLinks } from '../../lib/contact-links';
 
-const [settings, menus, siteData] = await Promise.all([getSiteSettings(), getMenus(), getSiteData()]);
+const [settings, menus, siteData, services, offices] = await Promise.all([
+  getSiteSettings(),
+  getMenus(),
+  getSiteData(),
+  getServices(),
+  getOffices(),
+]);
 const { footer, contact } = siteData;
 const currentYear = new Date().getFullYear();
 
@@ -15,34 +21,35 @@ const fallbackExplore = [
   { label: "Let's Talk", url: '/contact/' },
 ];
 
-const fallbackSocial = [
-  { label: 'Instagram', url: 'https://instagram.com/thedigitalecho' },
-  { label: 'LinkedIn', url: 'https://linkedin.com/company/thedigitalecho' },
-  { label: 'Facebook', url: 'https://facebook.com/thedigitalecho' },
-  { label: 'WhatsApp', url: contact.contactWhatsappUrl || 'https://wa.me/' },
-  { label: 'YouTube', url: 'https://youtube.com/@thedigitalecho' },
-];
-
 // Navigate column mirrors the primary menu (same links as the header / fullscreen nav).
 const exploreLinks = menus.primary.length
   ? menus.primary.map((item) => ({ label: item.label, url: item.url }))
   : menus.footerExplore.length
     ? menus.footerExplore
     : fallbackExplore;
-const platformLinks = menus.footerPlatforms;
-const socialLinks = menus.footerSocial.length ? menus.footerSocial : fallbackSocial;
 
-/* Footer Contact column — all values come from the `siteContact` ACF group. */
+// Services column — every service, same routes as the /services/ list.
+const serviceLinks = services.map((service) => ({
+  label: service.title,
+  url: `/services/${service.slug}/`,
+}));
+
+/* Footer Contact column — address/phone come from the Head Office (`office` CPT),
+   email + WhatsApp + socials from the `siteContact` ACF group (with office fallback). */
 const { whatsappHref, whatsappLabel, socials: contactSocials } = getContactLinks(contact);
+const headOffice = offices.find((office) => /head/i.test(office.companyType)) || offices[0];
+const officeAddress = headOffice?.address || contact.contactAddress || '';
+const officePhones = (
+  headOffice ? [headOffice.phone1, headOffice.phone2] : [contact.contactPhone]
+).map((phone) => phone.trim()).filter(Boolean);
+const contactEmail = contact.contactEmail || headOffice?.email || '';
 
-function isExternal(url: string) {
-  return /^https?:\/\//.test(url);
-}
+const SLOGAN_URL = 'https://tde.arwasys.in/wp-content/uploads/2026/10/slogan_1.svg';
 ---
 
 <footer class="border-t border-border">
   <div class="container py-16 md:py-24">
-    <!-- Logo -->
+    <!-- Logo + slogan -->
     <div class="mb-12 md:mb-16">
       <a href="/" class="inline-block hover:opacity-80 transition-opacity duration-300">
         {settings.logo ? (
@@ -57,14 +64,21 @@ function isExternal(url: string) {
           </span>
         )}
       </a>
+      <img
+        src={SLOGAN_URL}
+        alt="Let's Make Some Noise."
+        width="1089"
+        height="124"
+        class="mt-2 block h-5 md:h-6 w-auto"
+      />
       {footer.footerBlurb && (
         <p class="mt-4 max-w-md text-sm text-muted-foreground">{footer.footerBlurb}</p>
       )}
     </div>
 
     <!-- Links Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16 min-w-0 [overflow-wrap:anywhere]">
-      <!-- Explore -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-12 mb-16 min-w-0 [overflow-wrap:anywhere]">
+      <!-- Navigate -->
       <div>
         <h3 class="text-xs font-medium tracking-wider uppercase text-accent-blue mb-6">Navigate</h3>
         <nav class="flex flex-col gap-3">
@@ -79,35 +93,14 @@ function isExternal(url: string) {
         </nav>
       </div>
 
-      <!-- Platform -->
-      {platformLinks.length > 0 && (
-        <div>
-          <h3 class="text-xs font-medium tracking-wider uppercase text-accent-blue mb-6">Platform</h3>
-          <nav class="flex flex-col gap-3">
-            {platformLinks.map((link) => (
-              <a
-                href={link.url}
-                class="text-lg hover:text-accent transition-colors duration-300"
-                target={isExternal(link.url) ? '_blank' : undefined}
-                rel={isExternal(link.url) ? 'noopener noreferrer' : undefined}
-              >
-                {link.label}
-              </a>
-            ))}
-          </nav>
-        </div>
-      )}
-
-      <!-- Social -->
+      <!-- Services -->
       <div>
-        <h3 class="text-xs font-medium tracking-wider uppercase text-accent-blue mb-6">Connect</h3>
+        <h3 class="text-xs font-medium tracking-wider uppercase text-accent-blue mb-6">Services</h3>
         <nav class="flex flex-col gap-3">
-          {socialLinks.map((link) => (
+          {serviceLinks.map((link) => (
             <a
               href={link.url}
               class="text-lg hover:text-accent transition-colors duration-300"
-              target={isExternal(link.url) ? '_blank' : undefined}
-              rel={isExternal(link.url) ? 'noopener noreferrer' : undefined}
             >
               {link.label}
             </a>
@@ -119,19 +112,25 @@ function isExternal(url: string) {
       <div>
         <h3 class="text-xs font-medium tracking-wider uppercase text-accent-blue mb-6">Contact</h3>
         <div class="flex flex-col gap-3 text-lg">
-          {contact.contactEmail && (
-            <a href={`mailto:${contact.contactEmail}`} class="hover:text-accent transition-colors duration-300">
-              {contact.contactEmail}
-            </a>
+          {officeAddress && (
+            <p class="whitespace-pre-line text-muted-foreground">{officeAddress}</p>
           )}
+          {officePhones.map((phone) => (
+            <a
+              href={`tel:${phone.replace(/\s+/g, '')}`}
+              class="hover:text-accent transition-colors duration-300"
+            >
+              {phone}
+            </a>
+          ))}
           {whatsappHref && (
             <a href={whatsappHref} class="hover:text-accent transition-colors duration-300" target="_blank" rel="noopener noreferrer">
               {whatsappLabel}
             </a>
           )}
-          {contact.contactPhone && (
-            <a href={`tel:${contact.contactPhone.replace(/\s+/g, '')}`} class="hover:text-accent transition-colors duration-300">
-              {contact.contactPhone}
+          {contactEmail && (
+            <a href={`mailto:${contactEmail}`} class="hover:text-accent transition-colors duration-300">
+              {contactEmail}
             </a>
           )}
         </div>

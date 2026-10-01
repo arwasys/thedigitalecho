@@ -59,6 +59,24 @@ const USE_MOCK_DATA =
   import.meta.env.WORDPRESS_GRAPHQL_URL === 'https://example.com/graphql';
 
 /**
+ * Site logo (header, footer, fullscreen menu, page loader).
+ *
+ * The WordPress-hosted copy (`the-Digital-Echo-Logo.svg`, and any raster of it)
+ * draws "The" and "Echo" as ~2-unit hairline outlines — about 1 CSS px at the
+ * 64–80px display height we use, which aliases into a dotted/broken line.
+ * `/assets/tde-logo.svg` is the same artwork with those outlines (and the
+ * megaphone line art) thickened, so it is the default. `PUBLIC_LOGO_URL` still
+ * wins when it points at a *different* file — set the GitHub secret to the
+ * replacement URL when swapping the logo.
+ */
+const DOTTED_LOGO_MARKER = 'the-Digital-Echo-Logo.svg';
+const configuredLogo = import.meta.env.PUBLIC_LOGO_URL || '';
+
+export const SITE_LOGO_URL = configuredLogo.includes(DOTTED_LOGO_MARKER)
+  ? '/assets/tde-logo.svg'
+  : configuredLogo || '/assets/tde-logo.svg';
+
+/**
  * Shared catch handler. Strict mode must be active while `astro build`
  * prerenders pages (CI sets STRICT_FETCH=1 for the build process) so broken
  * WordPress data fails the build loudly — but it must NOT be baked into the
@@ -262,7 +280,7 @@ export async function getSiteSettings() {
       title: 'The Digital Echo',
       description: 'Digital Marketing & Content Production',
       url: 'http://localhost:4321',
-      logo: import.meta.env.PUBLIC_LOGO_URL || null,
+      logo: SITE_LOGO_URL,
     };
   }
   try {
@@ -275,7 +293,7 @@ export async function getSiteSettings() {
       title: settings.title || 'The Digital Echo',
       description: settings.description || 'Digital Marketing & Content Production',
       url: settings.url || 'http://localhost:4321',
-      logo: import.meta.env.PUBLIC_LOGO_URL || null,
+      logo: SITE_LOGO_URL,
     };
   } catch (e) {
     fetchFailed(e, 'Failed to fetch site settings:');
@@ -283,7 +301,7 @@ export async function getSiteSettings() {
       title: 'The Digital Echo',
       description: 'Digital Marketing & Content Production',
       url: 'http://localhost:4321',
-      logo: import.meta.env.PUBLIC_LOGO_URL || null,
+      logo: SITE_LOGO_URL,
     };
   }
 }

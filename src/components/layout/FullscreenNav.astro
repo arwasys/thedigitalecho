@@ -1,6 +1,7 @@
 ---
 import { getMenus, getServices, getHeroes, getSiteContact, getSiteSettings, htmlToText } from '../../lib/data';
 import { getContactLinks } from '../../lib/contact-links';
+import LineartField from '../ui/LineartField.astro';
 
 const [menus, contact, settings, services, heroes] = await Promise.all([
   getMenus(),
@@ -98,6 +99,8 @@ const serviceItems = services.map((service) => ({
 if (serviceItems.length) {
   panels['/services'] = { eyebrow: 'Services', headings: [], items: serviceItems };
 }
+
+const SLOGAN_URL = 'https://tde.arwasys.in/wp-content/uploads/2026/10/slogan_1.svg';
 ---
 
 <div id="fullscreen-nav" class="fullscreen-nav" data-open="false">
@@ -108,17 +111,26 @@ if (serviceItems.length) {
     </svg>
   </button>
 
-  <!-- Logo — top center -->
+  <!-- Logo + slogan — top center -->
   <div class="fullscreen-nav__logo">
-    {settings.logo ? (
-      <a href="/" class="fullscreen-nav__logo-link">
-        <img src={settings.logo} alt={settings.title} class="h-14 md:h-20 w-auto" />
-      </a>
-    ) : (
-      <a href="/" class="fullscreen-nav__logo-text">
-        THE <span>DIGITAL</span> ECHO
-      </a>
-    )}
+    <div class="fullscreen-nav__logo-stack">
+      {settings.logo ? (
+        <a href="/" class="fullscreen-nav__logo-link">
+          <img src={settings.logo} alt={settings.title} class="h-16 md:h-20 w-auto" />
+        </a>
+      ) : (
+        <a href="/" class="fullscreen-nav__logo-text">
+          THE <span>DIGITAL</span> ECHO
+        </a>
+      )}
+      <img
+        src={SLOGAN_URL}
+        alt="Let's Make Some Noise."
+        width="1089"
+        height="124"
+        class="fullscreen-nav__slogan"
+      />
+    </div>
   </div>
 
   <div class="fullscreen-nav__inner">
@@ -139,8 +151,11 @@ if (serviceItems.length) {
       })}
     </nav>
 
-    <!-- Right: hover reveal panel -->
+    <!-- Right: hover reveal panel (lineart animation runs by default and behind hovered content) -->
     <div class="fullscreen-nav__panel">
+      <div class="fullscreen-nav__panel-art" aria-hidden="true">
+        <LineartField />
+      </div>
       {Object.entries(panels).map(([key, panel]) => {
         const Wrapper = panel.href && !panel.items ? 'a' : 'div';
         const wrapperHref = panel.href && !panel.items ? panel.href : undefined;

@@ -1,5 +1,7 @@
 ---
-const logoUrl = import.meta.env.PUBLIC_LOGO_URL || '';
+import { SITE_LOGO_URL } from '../../lib/data';
+
+const logoUrl = SITE_LOGO_URL;
 ---
 
 <div id="page-loader" class="fixed inset-0 z-[100] bg-bg flex items-center justify-center">

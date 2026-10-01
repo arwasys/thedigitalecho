@@ -2,24 +2,35 @@
 import { getSiteSettings } from '../../lib/data';
 
 const settings = await getSiteSettings();
+
+const SLOGAN_URL = 'https://tde.arwasys.in/wp-content/uploads/2026/10/slogan_1.svg';
 ---
 
 <header id="site-header" class="fixed top-0 left-0 right-0 z-50 transition-all duration-500" transition:name="header" transition:animate="none">
   <div class="container flex items-center justify-between py-4 md:py-6">
-    <!-- Logo -->
-    <a href="/" class="flex items-center hover:opacity-80 transition-opacity duration-300 relative z-10">
-      {settings.logo ? (
-        <img 
-          src={settings.logo} 
-          alt={settings.title}
-          class="h-20 md:h-24 w-auto"
-        />
-      ) : (
-        <span class="text-sm font-bold tracking-widest uppercase transition-colors duration-300">
-          THE <span class="text-accent">DIGITAL</span> ECHO
-        </span>
-      )}
-    </a>
+    <!-- Logo + slogan -->
+    <div class="flex flex-col items-start gap-1.5 relative z-10">
+      <a href="/" class="flex items-center hover:opacity-80 transition-opacity duration-300">
+        {settings.logo ? (
+          <img 
+            src={settings.logo} 
+            alt={settings.title}
+            class="h-16 md:h-20 w-auto"
+          />
+        ) : (
+          <span class="text-sm font-bold tracking-widest uppercase transition-colors duration-300">
+            THE <span class="text-accent">DIGITAL</span> ECHO
+          </span>
+        )}
+      </a>
+      <img
+        src={SLOGAN_URL}
+        alt="Let's Make Some Noise."
+        width="1089"
+        height="124"
+        class="h-4 md:h-5 w-auto"
+      />
+    </div>
 
     <!-- Right Side: CTA + Hamburger -->
     <div class="flex items-center gap-6 relative z-10">
