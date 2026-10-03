@@ -7,7 +7,7 @@ const SLOGAN_URL = 'https://tde.arwasys.in/wp-content/uploads/2026/10/slogan_1.s
 ---
 
 <header id="site-header" class="fixed top-0 left-0 right-0 z-50 transition-all duration-500" transition:name="header" transition:animate="none">
-  <div class="container flex items-center justify-between py-4 md:py-6">
+  <div class="container header-bar flex items-center justify-between py-4 md:py-6">
     <!-- Logo + slogan -->
     <div class="flex flex-col items-start gap-1.5 relative z-10">
       <a href="/" class="flex items-center hover:opacity-80 transition-opacity duration-300">
@@ -15,7 +15,7 @@ const SLOGAN_URL = 'https://tde.arwasys.in/wp-content/uploads/2026/10/slogan_1.s
           <img 
             src={settings.logo} 
             alt={settings.title}
-            class="h-16 md:h-20 w-auto"
+            class="header-logo h-16 md:h-20 w-auto"
           />
         ) : (
           <span class="text-sm font-bold tracking-widest uppercase transition-colors duration-300">
@@ -28,7 +28,7 @@ const SLOGAN_URL = 'https://tde.arwasys.in/wp-content/uploads/2026/10/slogan_1.s
         alt="Let's Make Some Noise."
         width="1089"
         height="124"
-        class="h-4 md:h-5 w-auto"
+        class="header-slogan h-4 md:h-5 w-auto"
       />
     </div>
 
@@ -62,9 +62,9 @@ const SLOGAN_URL = 'https://tde.arwasys.in/wp-content/uploads/2026/10/slogan_1.s
     if (!header) return;
     
     if (window.scrollY > 50) {
-      header.classList.add('bg-bg/90', 'backdrop-blur-md', 'border-b', 'border-border');
+      header.classList.add('bg-bg/90', 'backdrop-blur-md', 'border-b', 'border-border', 'is-scrolled');
     } else {
-      header.classList.remove('bg-bg/90', 'backdrop-blur-md', 'border-b', 'border-border');
+      header.classList.remove('bg-bg/90', 'backdrop-blur-md', 'border-b', 'border-border', 'is-scrolled');
     }
   }
   
@@ -79,3 +79,51 @@ const SLOGAN_URL = 'https://tde.arwasys.in/wp-content/uploads/2026/10/slogan_1.s
   initHeader();
   document.addEventListener('astro:page-load', initHeader);
 </script>
+
+<style>
+  #site-header .header-bar,
+  #site-header .header-logo,
+  #site-header .header-slogan {
+    transition:
+      padding 0.4s ease,
+      height 0.4s ease;
+  }
+
+  #site-header .btn-sm {
+    transition:
+      padding 0.4s ease,
+      background-color 0.3s ease,
+      border-color 0.3s ease,
+      color 0.3s ease;
+  }
+
+  /* Compact bar once the page is scrolled */
+  #site-header.is-scrolled .header-bar {
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+  }
+
+  #site-header.is-scrolled .header-logo {
+    height: 2.5rem;
+  }
+
+  #site-header.is-scrolled .header-slogan {
+    height: 0.75rem;
+  }
+
+  #site-header.is-scrolled .btn-sm {
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+    padding-inline: 1rem;
+  }
+
+  @media (min-width: 768px) {
+    #site-header.is-scrolled .header-logo {
+      height: 3rem;
+    }
+
+    #site-header.is-scrolled .header-slogan {
+      height: 1rem;
+    }
+  }
+</style>

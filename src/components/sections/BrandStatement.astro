@@ -29,7 +29,7 @@ const { title, title1, title2, fullTitle, paragraphs, reels } = data;
   <div class="container relative z-10">
     <div class="grid md:grid-cols-2 gap-8 md:gap-12 items-stretch">
       <!-- Left: camera viewfinder card -->
-      <div class="relative overflow-hidden rounded-[3rem] md:rounded-[5rem] border border-border bg-[#0D0B07] text-[#F2EEE5] p-8 md:p-12" data-reveal="up">
+      <div class="relative overflow-hidden rounded-[3rem] md:rounded-[5rem] border border-border bg-[#0D0B07] text-[#F2EEE5] p-8 md:p-12" data-bs-card data-reveal="up">
         <!-- Corner brackets -->
         <span class="absolute top-6 left-6 w-8 h-8 border-t-2 border-l-2 border-accent rounded-tl-2xl" aria-hidden="true"></span>
         <span class="absolute top-6 right-6 w-8 h-8 border-t-2 border-r-2 border-accent rounded-tr-2xl" aria-hidden="true"></span>
@@ -81,7 +81,7 @@ const { title, title1, title2, fullTitle, paragraphs, reels } = data;
       </div>
 
       <!-- Right: vertical video marquee -->
-      <div class="relative min-h-[560px] md:min-h-0 md:-my-36 overflow-hidden" data-reveal="up">
+      <div class="relative min-h-[560px] overflow-hidden" data-bs-scroller data-reveal="up">
         <div class="bs-track absolute top-0 left-0 w-full flex flex-col">
           <!-- Videos (set 1) -->
           {reels.map((src) => (
@@ -113,18 +113,79 @@ const { title, title1, title2, fullTitle, paragraphs, reels } = data;
 
   let marquee: gsap.core.Tween | null = null;
   let ro: ResizeObserver | null = null;
+  let vio: IntersectionObserver | null = null;
+  let scroller: HTMLElement | null = null;
+  let hovering = false;
+
+  function applyPlayState() {
+    if (!marquee) return;
+    if (hovering) marquee.pause();
+    else marquee.play();
+  }
+
+  const pauseOn = () => {
+    hovering = true;
+    applyPlayState();
+  };
+  const pauseOff = () => {
+    hovering = false;
+    applyPlayState();
+  };
 
   function initMarquee() {
-    const track = document.querySelector('.bs-track');
+    const root = document.querySelector('[data-brand-statement]');
+    if (!root) return;
+
+    const track = root.querySelector<HTMLElement>('.bs-track');
     if (!track) return;
 
-    const wrap = track.parentElement;
+    const wrap = track.parentElement as HTMLElement | null;
+    const card = root.querySelector<HTMLElement>('[data-bs-card]');
+
+    // Scroller height is locked to the content card height
     if (wrap) {
-      const setH = () => wrap.style.setProperty('--bs-h', `${wrap.clientHeight}px`);
+      const setH = () => {
+        const h = card ? card.offsetHeight : wrap.clientHeight;
+        if (h > 0) {
+          wrap.style.minHeight = `${h}px`;
+          wrap.style.setProperty('--bs-h', `${h}px`);
+        }
+      };
       setH();
       if (ro) ro.disconnect();
       ro = new ResizeObserver(setH);
-      ro.observe(wrap);
+      ro.observe(card ?? wrap);
+    }
+
+    // Only videos inside the viewport keep playing
+    if (vio) vio.disconnect();
+    vio = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          const video = entry.target as HTMLVideoElement;
+          if (entry.isIntersecting) video.play().catch(() => {});
+          else video.pause();
+        }
+      },
+      { rootMargin: '120px 0px' },
+    );
+    root.querySelectorAll('video').forEach((video) => vio?.observe(video));
+
+    // Stop the slider while the pointer/finger is over it
+    if (scroller) {
+      scroller.removeEventListener('pointerenter', pauseOn);
+      scroller.removeEventListener('pointerleave', pauseOff);
+      scroller.removeEventListener('touchstart', pauseOn);
+      scroller.removeEventListener('touchend', pauseOff);
+      scroller.removeEventListener('touchcancel', pauseOff);
+    }
+    if (wrap) {
+      scroller = wrap;
+      scroller.addEventListener('pointerenter', pauseOn);
+      scroller.addEventListener('pointerleave', pauseOff);
+      scroller.addEventListener('touchstart', pauseOn, { passive: true });
+      scroller.addEventListener('touchend', pauseOff, { passive: true });
+      scroller.addEventListener('touchcancel', pauseOff, { passive: true });
     }
 
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
@@ -138,6 +199,7 @@ const { title, title1, title2, fullTitle, paragraphs, reels } = data;
       duration: Math.max(22, slidesPerSet * 7.3),
       repeat: -1,
     });
+    applyPlayState();
   }
 
   initMarquee();
