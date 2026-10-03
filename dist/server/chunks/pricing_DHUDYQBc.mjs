@@ -1,9 +1,9 @@
 import { t as __exportAll } from "./rolldown-runtime_D7D4PA-g.mjs";
 import { a as renderComponent, f as renderTemplate, h as addAttribute, n as renderTransition, p as maybeRenderHead } from "./server_FTIkVOiY.mjs";
 import { t as createComponent } from "./compiler_B7Puqq8M.mjs";
-import { a as renderScript, i as $$LineartField, n as $$Header, r as $$BaseLayout, t as $$Footer } from "./Footer_D7-y0MZk.mjs";
+import { a as renderScript, i as $$LineartField, n as $$Header, r as $$BaseLayout, t as $$Footer } from "./Footer_DgptgYXK.mjs";
 import { h as getPricingPlans, o as getHeroByPage } from "./data_B44KnQRi.mjs";
-import { t as $$InnerHero } from "./InnerHero_B-vtzaF3.mjs";
+import { t as $$InnerHero } from "./InnerHero_Cu1Z0Z9n.mjs";
 //#region src/pages/pricing.astro
 var pricing_exports = /* @__PURE__ */ __exportAll({
 	default: () => $$Pricing,
