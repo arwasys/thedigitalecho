@@ -1407,6 +1407,10 @@ function withTrailingSlash(href) {
 	if (!href || !href.startsWith("/") || href.includes("#") || href.includes("?")) return href;
 	return href.endsWith("/") ? href : `${href}/`;
 }
+function toHttpsUrl(value) {
+	if (typeof value !== "string") return "";
+	return value.replace(/^http:\/\//i, "https://");
+}
 function normalizePost(raw) {
 	return {
 		id: raw.id || "",
@@ -1642,7 +1646,7 @@ function normalizeHero(raw) {
 		smallText: String(section?.smallText || ""),
 		title1: String(section?.title1 || ""),
 		heroDescription: String(raw.content || "").replace(/<\/?p[^>]*>/gi, ""),
-		videoUrl: String(section?.videoUrl || ""),
+		videoUrl: toHttpsUrl(String(section?.videoUrl || "")),
 		button1Label: String(section?.button1Label || ""),
 		button1PageLink: withTrailingSlash(String(section?.button1PageLink || "")),
 		button2Label: String(section?.button2Label || ""),
@@ -1673,10 +1677,10 @@ async function getHeroes() {
 }
 function toMediaUrl(value) {
 	if (!value) return "";
-	if (typeof value === "string") return value;
-	if (typeof value.url === "string") return value.url;
-	if (typeof value.node?.url === "string") return value.node.url;
-	if (typeof value.node?.sourceUrl === "string") return value.node.sourceUrl;
+	if (typeof value === "string") return toHttpsUrl(value);
+	if (typeof value.url === "string") return toHttpsUrl(value.url);
+	if (typeof value.node?.url === "string") return toHttpsUrl(value.node.url);
+	if (typeof value.node?.sourceUrl === "string") return toHttpsUrl(value.node.sourceUrl);
 	return "";
 }
 function splitParagraphs(html) {

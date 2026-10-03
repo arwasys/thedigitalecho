@@ -1,8 +1,8 @@
 import { t as __exportAll } from "./rolldown-runtime_D7D4PA-g.mjs";
 import { C as createAstro, a as renderComponent, f as renderTemplate, h as addAttribute, n as renderTransition, p as maybeRenderHead } from "./server_FTIkVOiY.mjs";
 import { t as createComponent } from "./compiler_B7Puqq8M.mjs";
-import { a as renderScript, i as $$LineartField, n as $$Header, r as $$BaseLayout, t as $$Footer } from "./Footer_DgptgYXK.mjs";
-import { _ as getProjectBySlug } from "./data_B44KnQRi.mjs";
+import { a as renderScript, i as $$LineartField, n as $$Header, r as $$BaseLayout, t as $$Footer } from "./Footer_yvp5sNH_.mjs";
+import { _ as getProjectBySlug } from "./data_CENCxwns.mjs";
 //#region src/pages/projects/[slug].astro
 var _slug__exports = /* @__PURE__ */ __exportAll({
 	default: () => $$Slug,
