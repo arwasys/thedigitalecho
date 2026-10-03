@@ -124,6 +124,13 @@ export function withTrailingSlash(href: string): string {
   return href.endsWith('/') ? href : `${href}/`;
 }
 
+// WordPress can return http:// media URLs; the site is served over https only, so an
+// insecure subresource flips the browser padlock to "Not secure" (mixed content).
+function toHttpsUrl(value: unknown): string {
+  if (typeof value !== 'string') return '';
+  return value.replace(/^http:\/\//i, 'https://');
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function normalizePost(raw: Record<string, any>): Post {
   return {
@@ -478,7 +485,7 @@ function normalizeHero(raw: Record<string, any>): Hero {
     smallText: String(section?.smallText || ''),
     title1: String(section?.title1 || ''),
     heroDescription: String(raw.content || '').replace(/<\/?p[^>]*>/gi, ''),
-    videoUrl: String(section?.videoUrl || ''),
+    videoUrl: toHttpsUrl(String(section?.videoUrl || '')),
     button1Label: String(section?.button1Label || ''),
     button1PageLink: withTrailingSlash(String(section?.button1PageLink || '')),
     button2Label: String(section?.button2Label || ''),
@@ -526,10 +533,10 @@ export async function getHeroes(): Promise<Hero[]> {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function toMediaUrl(value: any): string {
   if (!value) return '';
-  if (typeof value === 'string') return value;
-  if (typeof value.url === 'string') return value.url;
-  if (typeof value.node?.url === 'string') return value.node.url;
-  if (typeof value.node?.sourceUrl === 'string') return value.node.sourceUrl;
+  if (typeof value === 'string') return toHttpsUrl(value);
+  if (typeof value.url === 'string') return toHttpsUrl(value.url);
+  if (typeof value.node?.url === 'string') return toHttpsUrl(value.node.url);
+  if (typeof value.node?.sourceUrl === 'string') return toHttpsUrl(value.node.sourceUrl);
   return '';
 }
 
